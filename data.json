@@ -2,7 +2,7 @@
   "meta": {
     "title": "World Cup '26 Sweep",
     "subtitle": "Everything But · Last Team Standing",
-    "lastUpdated": "2026-06-03T23:05:53.034Z",
+    "lastUpdated": "2026-06-03T23:06:23.378Z",
     "lastResultSync": "2026-06-03T05:47:55.918919+00:00"
   },
   "teams": [
@@ -344,99 +344,12 @@
     }
   ],
   "boys": [
-    "1",
-    "2",
-    "3",
-    "4",
-    "5",
-    "6",
-    "7",
-    "8",
-    "9"
+    ""
   ],
   "draw": {
-    "completed": true,
-    "order": [
-      "9",
-      "2",
-      "3",
-      "6",
-      "5",
-      "8",
-      "4",
-      "1",
-      "7"
-    ],
-    "allocations": {
-      "1": [
-        "sen",
-        "sui",
-        "sco",
-        "por",
-        "civ"
-      ],
-      "2": [
-        "esp",
-        "cro",
-        "mex",
-        "nzl",
-        "aus"
-      ],
-      "3": [
-        "uru",
-        "irq",
-        "qat",
-        "nor",
-        "cod"
-      ],
-      "4": [
-        "aut",
-        "bih",
-        "ger",
-        "tun",
-        "pan"
-      ],
-      "5": [
-        "ecu",
-        "cze",
-        "ksa",
-        "jor",
-        "alg"
-      ],
-      "6": [
-        "uzb",
-        "usa",
-        "bra",
-        "fra",
-        "col"
-      ],
-      "7": [
-        "can",
-        "cpv",
-        "mar",
-        "eng",
-        "cur"
-      ],
-      "8": [
-        "rsa",
-        "egy",
-        "bel",
-        "ned",
-        "gha"
-      ],
-      "9": [
-        "swe",
-        "hai",
-        "par",
-        "irn",
-        "kor"
-      ],
-      "40th Trip": [
-        "arg",
-        "jpn",
-        "tur"
-      ]
-    }
+    "completed": false,
+    "order": [],
+    "allocations": {}
   },
   "champion": null,
   "schedule": [
