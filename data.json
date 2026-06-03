@@ -2,7 +2,7 @@
   "meta": {
     "title": "World Cup '26 Sweep",
     "subtitle": "Everything But · Last Team Standing",
-    "lastUpdated": "2026-06-03T23:35:50.783Z",
+    "lastUpdated": "2026-06-03T23:37:22.390Z",
     "lastResultSync": "2026-06-03T05:47:55.918919+00:00"
   },
   "teams": [
@@ -344,107 +344,12 @@
     }
   ],
   "boys": [
-    "1",
-    "2",
-    "3",
-    "4",
-    "5",
-    "6",
-    "7",
-    "8",
-    "9",
-    "19",
-    "11"
+    ""
   ],
   "draw": {
-    "completed": true,
-    "order": [
-      "19",
-      "8",
-      "3",
-      "11",
-      "2",
-      "4",
-      "9",
-      "7",
-      "1",
-      "6",
-      "5"
-    ],
-    "allocations": {
-      "1": [
-        "egy",
-        "can",
-        "rsa",
-        "usa"
-      ],
-      "2": [
-        "gha",
-        "irn",
-        "jpn",
-        "aus"
-      ],
-      "3": [
-        "sco",
-        "eng",
-        "tun",
-        "sui"
-      ],
-      "4": [
-        "ger",
-        "ecu",
-        "tur",
-        "uzb"
-      ],
-      "5": [
-        "bih",
-        "swe",
-        "col",
-        "cur"
-      ],
-      "6": [
-        "esp",
-        "bra",
-        "nzl",
-        "kor"
-      ],
-      "7": [
-        "cro",
-        "hai",
-        "bel",
-        "ned"
-      ],
-      "8": [
-        "alg",
-        "sen",
-        "fra",
-        "aut"
-      ],
-      "9": [
-        "civ",
-        "cze",
-        "irq",
-        "qat"
-      ],
-      "11": [
-        "jor",
-        "arg",
-        "ksa",
-        "cod"
-      ],
-      "19": [
-        "cpv",
-        "uru",
-        "mar",
-        "nor"
-      ],
-      "40th Trip": [
-        "mex",
-        "por",
-        "par",
-        "pan"
-      ]
-    }
+    "completed": false,
+    "order": [],
+    "allocations": {}
   },
   "champion": null,
   "schedule": [
