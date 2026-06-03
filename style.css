@@ -538,14 +538,9 @@ label.fld { display:block; font-size:12px; font-weight:800; letter-spacing:0.1em
 .bulbs i:nth-child(4n){ animation-delay:.45s } .bulbs i:nth-child(5n){ animation-delay:.6s }
 @keyframes bulbBlink { 0%,100%{opacity:1; box-shadow:0 0 9px #ffd24a} 50%{opacity:.25; box-shadow:0 0 2px #ffd24a} }
 .pokie-name {
-  font-family: var(--display); color:#b81226; letter-spacing:0.04em; font-size:21px;
-  line-height:0.9; text-transform:uppercase; text-shadow: 0 1px 0 #fff4c8, 0 0 2px #fff;
+  font-family: var(--display); color:#b81226; letter-spacing:0.04em; font-size:22px;
+  line-height:0.92; text-transform:uppercase; text-shadow: 0 1px 0 #fff4c8, 0 0 2px #fff;
 }
-.seven {
-  font-family: var(--display); font-size:26px; line-height:1; margin-top:5px;
-  color:#c8141f; text-shadow: 0 2px 0 #7a0a10, 0 0 10px rgba(255,60,60,0.5);
-}
-.seven span { color:#1d6fd6; text-shadow: 0 2px 0 #0c3a78; margin:0 3px; }
 
 .pokie-body { padding:14px 16px 0; position:relative; }
 /* the reel window with a thick gold bezel */
@@ -608,7 +603,7 @@ label.fld { display:block; font-size:12px; font-weight:800; letter-spacing:0.1em
 @keyframes winFlash { 50% { box-shadow: 0 26px 70px -16px #000, 0 0 40px 6px rgba(255,210,74,0.7); } }
 .pokie.win .pokie-window { border-color:#fff; box-shadow: inset 0 14px 24px rgba(0,0,0,0.8), inset 0 -14px 24px rgba(0,0,0,0.8), 0 0 0 2px #ffd24a, 0 0 30px rgba(255,210,74,0.8); }
 .pokie.win .bulbs i { animation: bulbBlink .25s infinite; }
-.pokie.win .seven { animation: pulse .3s ease-in-out 3; }
+.pokie.win .pokie-name { animation: pulse .3s ease-in-out 3; }
 
 /* ---------- Spectator (no token) ---------- */
 .spectator .admin-only { display:none !important; }
@@ -648,7 +643,7 @@ label.fld { display:block; font-size:12px; font-weight:800; letter-spacing:0.1em
   .pokie { --rcell:58px; width:min(270px,80vw); }
   .reel-cell .rc-flag { font-size:32px; }
   .reel-cell .rc-name { font-size:14px; }
-  .pokie-name { font-size:18px; } .seven { font-size:22px; }
+  .pokie-name { font-size:19px; }
   .lever { right:-24px; top:70px; height:130px; }
   .lever-rod { height:96px; } .lever-ball { width:26px; height:26px; }
   .d2-boys { flex:none; width:100%; max-height:40vh; }
