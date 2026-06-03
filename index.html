@@ -31,8 +31,8 @@
     </header>
 
     <nav class="tabs">
-      <button data-view="draw" class="active">The Draw</button>
-      <button data-view="matches">Match Centre</button>
+      <button data-view="draw">The Draw</button>
+      <button data-view="matches" class="active">Match Centre</button>
       <button data-view="groups">Groups</button>
       <button data-view="knockout">Knockout</button>
       <button data-view="standings">Standings</button>
@@ -41,7 +41,7 @@
     </nav>
 
     <!-- ============ DRAW ============ -->
-    <section class="view active" id="view-draw">
+    <section class="view" id="view-draw">
       <!-- setup (shown when no draw yet) -->
       <div class="panel" id="drawSetup">
         <!-- step 1: enter boys + draw the order -->
@@ -97,7 +97,7 @@
     </section>
 
     <!-- ============ MATCH CENTRE ============ -->
-    <section class="view" id="view-matches">
+    <section class="view active" id="view-matches">
       <div class="mc-daynav">
         <button class="mc-arrow" id="mcPrev" title="Previous day">‹</button>
         <div class="mc-daylabel">

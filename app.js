@@ -859,8 +859,8 @@ async function init() {
 
   // tabs — restore whichever tab was open before a refresh
   $$('nav.tabs button').forEach(b => b.addEventListener('click', () => switchView(b.dataset.view)));
-  let saved = 'draw';
-  try { saved = localStorage.getItem(VIEW_KEY) || 'draw'; } catch {}
+  let saved = 'matches';
+  try { saved = localStorage.getItem(VIEW_KEY) || 'matches'; } catch {}
   if ($('#view-' + saved)) switchView(saved);
 
   // draw setup — two steps: draw the order, then draw the teams

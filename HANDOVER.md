@@ -95,7 +95,7 @@ python3 scripts/update_results.py --local FILE      # use a local openfootball j
 ## Key behaviours / conventions
 
 - **Times** are always shown in Sydney (AEST), DST-safe via `Intl` timeZone.
-- **Active tab persists** across refresh (localStorage `wcs_view`).
+- **Active tab persists** across refresh (localStorage `wcs_view`); first-time default landing tab is **Match Centre**.
 - **Owner tags** appear on teams throughout (group tables, bracket, match centre — hidden on mobile in match centre).
 - **Mobile-first** is the priority (most viewing is on phones).
 - Australian English; no em dashes.
@@ -114,7 +114,6 @@ openfootball name diffs handled in the updater's `NAME_FIX`.
 
 ## Common next tasks (ideas, not committed)
 
-- Make Match Centre the default landing tab once the tournament starts.
 - Add a true live score source if openfootball lag is annoying (football-data.org via the Action — needs a free key as a repo secret).
 - Per-team goal totals / a "your live teams today" highlight for each boy.
 
