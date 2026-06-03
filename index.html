@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>World Cup '26 Sweep</title>
+  <meta name="description" content="World Cup 2026 sweepstake — last team standing." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚽</text></svg>" />
+</head>
+<body>
+  <div class="wrap">
+    <header class="top">
+      <span class="kicker">⚽ The Boys · Sweepstake</span>
+      <div class="sync-status" id="syncStatus">
+        <span class="dot" id="syncDot"></span>
+        <span id="syncLabel">Local only</span>
+      </div>
+      <h1 class="title">World Cup <span class="yr">'26</span></h1>
+      <p class="subtitle" id="subtitle">Last team standing takes the pot</p>
+    </header>
+
+    <nav class="tabs">
+      <button data-view="draw" class="active">The Draw</button>
+      <button data-view="standings">Standings</button>
+      <button data-view="teams">Teams</button>
+      <button data-view="settings">Settings</button>
+    </nav>
+
+    <!-- ============ DRAW ============ -->
+    <section class="view active" id="view-draw">
+      <!-- setup (shown when no draw yet) -->
+      <div class="panel" id="drawSetup">
+        <h2>Enter the boys</h2>
+        <p class="hint">Add everyone playing. When you hit the button, the draw order gets shuffled and all 48 teams are dealt out live.</p>
+        <div class="boys-list" id="boysList"></div>
+        <div class="row-actions">
+          <button class="btn btn-ghost" id="addBoy">+ Add a boy</button>
+          <span class="count-chip" id="splitChip"></span>
+        </div>
+        <div style="margin-top:22px; display:flex; gap:12px; flex-wrap:wrap;">
+          <button class="btn btn-primary btn-lg" id="runDraw">🎲 Run the draw</button>
+        </div>
+        <p class="help" id="setupNote" style="margin-top:14px;"></p>
+      </div>
+
+      <!-- results board (shown when draw done) -->
+      <div id="drawResults" style="display:none;">
+        <div id="winnerBannerSlot"></div>
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
+          <div>
+            <h2 style="font-family:var(--display); text-transform:uppercase; font-size:28px;">The Draw Is In</h2>
+            <p class="hint" style="margin:0;" id="boardSub"></p>
+          </div>
+          <button class="btn btn-ghost" id="redraw">↻ Re-run draw</button>
+        </div>
+        <div class="board" id="board"></div>
+      </div>
+    </section>
+
+    <!-- ============ STANDINGS ============ -->
+    <section class="view" id="view-standings">
+      <div id="standingsWinnerSlot"></div>
+      <div class="panel">
+        <h2>Standings</h2>
+        <p class="hint">Ranked by teams still alive in the tournament. Knocked-out teams are struck through.</p>
+        <div class="board" id="standingsBoard"></div>
+      </div>
+    </section>
+
+    <!-- ============ TEAMS ============ -->
+    <section class="view" id="view-teams">
+      <div class="panel">
+        <h2>Tournament Tracker</h2>
+        <p class="hint" id="teamsHint">Tap ✕ to knock a team out, ↺ to revive it, 👑 to crown the champion. Changes save to GitHub.</p>
+        <div id="teamsAdmin"></div>
+      </div>
+    </section>
+
+    <!-- ============ SETTINGS ============ -->
+    <section class="view" id="view-settings">
+      <div class="panel">
+        <h2>GitHub Sync</h2>
+        <p class="hint">So everyone sees the same live draw and results. Fill this in once (admin only). Friends just open the link — they see the latest committed data automatically.</p>
+        <div class="field-grid">
+          <div><label class="fld">Repo owner</label><input type="text" id="cfgOwner" placeholder="danielf-neara" /></div>
+          <div><label class="fld">Repo name</label><input type="text" id="cfgRepo" placeholder="world-cup-sweep" /></div>
+          <div><label class="fld">Branch</label><input type="text" id="cfgBranch" placeholder="main" /></div>
+          <div><label class="fld">Data file path</label><input type="text" id="cfgPath" placeholder="data.json" /></div>
+          <div class="full"><label class="fld">Personal access token (admin only)</label><input type="password" id="cfgToken" placeholder="ghp_… — kept in your browser, never committed" /></div>
+        </div>
+        <div class="row-actions" style="margin-top:18px;">
+          <button class="btn btn-primary" id="cfgSave">Save config</button>
+          <button class="btn btn-ghost" id="cfgPull">Load from GitHub</button>
+          <button class="btn btn-magenta" id="cfgPush">Save to GitHub</button>
+        </div>
+        <p class="help" id="cfgStatus" style="margin-top:14px;"></p>
+        <p class="help">
+          Token needs <b>Contents: Read &amp; write</b> on the repo (fine-grained PAT), or the classic <code>repo</code> scope.
+          Without a token the app is read-only — anyone can view the draw and standings, only the admin can change them.
+        </p>
+      </div>
+
+      <div class="panel">
+        <h2>Local Backup</h2>
+        <p class="hint">Export or import the whole sweep as a JSON file.</p>
+        <div class="row-actions">
+          <button class="btn btn-ghost" id="exportJson">⬇ Export JSON</button>
+          <button class="btn btn-ghost" id="importJsonBtn">⬆ Import JSON</button>
+          <input type="file" id="importJson" accept="application/json" style="display:none" />
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2 style="color:var(--magenta);">Danger Zone</h2>
+        <p class="hint">Reset the draw (keeps the boys and teams) or wipe everything back to a fresh tournament.</p>
+        <div class="row-actions">
+          <button class="btn btn-ghost" id="resetDraw">Reset the draw</button>
+          <button class="btn btn-ghost" id="resetAll" style="color:var(--magenta); border-color:var(--magenta);">Wipe everything</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- draw stage overlay -->
+  <div class="stage" id="stage">
+    <div class="phase" id="stagePhase"></div>
+    <div class="onclock" id="stageOnClock"></div>
+    <div id="stageBody"></div>
+    <button class="skip" id="stageSkip">Skip animation ⏭</button>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
