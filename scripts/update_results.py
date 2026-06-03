@@ -186,14 +186,29 @@ def main():
     with open(DATA_PATH, encoding="utf-8") as f:
         data = json.load(f)
 
+    # snapshot the bits that actually matter, ignoring the sync timestamp,
+    # so a no-op run doesn't churn a commit every 20 minutes
+    def fingerprint(d):
+        return json.dumps({
+            "schedule": d.get("schedule"),
+            "teams": [{"id": t["id"], "status": t.get("status")} for t in d.get("teams", [])],
+            "champion": d.get("champion"),
+        }, sort_keys=True, ensure_ascii=False)
+
+    before = fingerprint(data)
+
     of = fetch_openfootball(local)
     data["schedule"] = build(data, of)
     derive_status(data)
 
+    print(summarise(data))
+
+    if fingerprint(data) == before:
+        print("No result changes — leaving data.json untouched.")
+        return
+
     from datetime import datetime, timezone
     data.setdefault("meta", {})["lastResultSync"] = datetime.now(timezone.utc).isoformat()
-
-    print(summarise(data))
 
     if dry:
         print("(dry run — data.json not written)")
