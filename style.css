@@ -509,40 +509,106 @@ label.fld { display:block; font-size:12px; font-weight:800; letter-spacing:0.1em
 .d2-chip.pop { animation: chippop .42s cubic-bezier(.2,1.5,.4,1); }
 @keyframes chippop { from { transform:scale(.35); opacity:0; } to { transform:scale(1); opacity:1; } }
 
-.d2-machine { flex:.95; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; }
+.d2-machine { flex:.95; display:flex; align-items:center; justify-content:center; padding-right:34px; }
+
+/* classic one-armed-bandit cabinet */
 .pokie {
   --rcell: 92px;
-  width:min(330px, 82vw);
-  background: linear-gradient(180deg, #2a0f3a, #140720);
-  border:3px solid var(--gold); border-radius:22px; padding:14px;
-  box-shadow: 0 24px 60px -15px #000, inset 0 0 32px rgba(255,206,58,0.12);
+  position:relative;
+  width:min(312px, 80vw);
+  background: linear-gradient(180deg, #e0263f 0%, #b01430 55%, #7c0c20 100%);
+  border:4px solid #ffd24a; border-radius: 30px 30px 20px 20px;
+  padding:0 0 16px;
+  box-shadow: 0 26px 70px -16px #000, inset 0 0 26px rgba(0,0,0,0.35), inset 0 2px 0 rgba(255,255,255,0.25);
 }
-.pokie-marquee {
-  text-align:center; font-family: var(--display); letter-spacing:0.1em; color: var(--gold);
-  font-size:15px; padding-bottom:10px; text-shadow: 0 0 12px rgba(255,206,58,0.6);
+/* gold domed crown with marquee bulbs + 777 */
+.pokie-crown {
+  background: radial-gradient(120% 130% at 50% -10%, #fff0bc, #f5bb43 52%, #cf8a1e 100%);
+  border-radius: 26px 26px 8px 8px; border-bottom:3px solid #8a5a12;
+  padding:10px 14px 12px; text-align:center; position:relative;
+  box-shadow: inset 0 -6px 12px rgba(140,80,10,0.4);
 }
+.bulbs { display:flex; justify-content:space-between; margin-bottom:6px; padding:0 2px; }
+.bulbs i {
+  width:9px; height:9px; border-radius:50%;
+  background: radial-gradient(circle at 35% 30%, #fff, #ffd24a 45%, #b8860b);
+  box-shadow: 0 0 7px #ffd24a; animation: bulbBlink 1.1s infinite;
+}
+.bulbs i:nth-child(2n){ animation-delay:.15s } .bulbs i:nth-child(3n){ animation-delay:.3s }
+.bulbs i:nth-child(4n){ animation-delay:.45s } .bulbs i:nth-child(5n){ animation-delay:.6s }
+@keyframes bulbBlink { 0%,100%{opacity:1; box-shadow:0 0 9px #ffd24a} 50%{opacity:.25; box-shadow:0 0 2px #ffd24a} }
+.jackpot {
+  font-family: var(--display); color:#b81226; letter-spacing:0.16em; font-size:18px;
+  text-shadow: 0 1px 0 #fff4c8, 0 0 2px #fff;
+}
+.seven {
+  font-family: var(--display); font-size:30px; line-height:1; margin-top:2px;
+  color:#c8141f; text-shadow: 0 2px 0 #7a0a10, 0 0 10px rgba(255,60,60,0.5);
+}
+.seven span { color:#1d6fd6; text-shadow: 0 2px 0 #0c3a78; margin:0 3px; }
+
+.pokie-body { padding:14px 16px 0; position:relative; }
+/* the reel window with a thick gold bezel */
 .pokie-window {
-  position:relative; height: calc(var(--rcell) * 3); overflow:hidden; border-radius:12px;
-  background: linear-gradient(180deg, #0b0410, #1c0d2c, #0b0410);
-  border:2px solid rgba(255,206,58,0.4);
-  box-shadow: inset 0 12px 22px rgba(0,0,0,0.75), inset 0 -12px 22px rgba(0,0,0,0.75);
+  position:relative; height: calc(var(--rcell) * 3); overflow:hidden; border-radius:10px;
+  background: linear-gradient(180deg, #07040a, #160a16 50%, #07040a);
+  border:5px solid #ffd24a;
+  box-shadow: inset 0 14px 24px rgba(0,0,0,0.8), inset 0 -14px 24px rgba(0,0,0,0.8),
+              0 0 0 2px #8a5a12, 0 0 22px rgba(0,0,0,0.6);
 }
 .reel { will-change: transform; }
-.reel.spinning { filter: blur(0.7px); }
-.reel.hit { filter: drop-shadow(0 0 14px var(--lime)); }
+.reel.spinning { filter: blur(0.8px); }
 .reel-cell {
   height: var(--rcell); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
 }
 .reel-cell .rc-flag { font-size:46px; line-height:1; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5)); }
 .reel-cell .rc-name { font-family: var(--display); text-transform:uppercase; font-size:17px; color:#fff; }
+/* payline across the centre window with gold arrows */
 .payline {
   position:absolute; top:50%; left:0; right:0; height: var(--rcell); transform: translateY(-50%);
-  border-top:2px solid var(--magenta); border-bottom:2px solid var(--magenta);
-  box-shadow: 0 0 18px rgba(255,46,116,0.5); pointer-events:none;
+  border-top:2px solid rgba(255,46,116,0.9); border-bottom:2px solid rgba(255,46,116,0.9);
+  box-shadow: 0 0 18px rgba(255,46,116,0.45); pointer-events:none;
+  background: linear-gradient(180deg, transparent, rgba(255,46,116,0.06), transparent);
 }
-.pokie-foot { text-align:center; color: var(--text); font-weight:700; font-size:14px; padding-top:10px; }
-.pokie-foot b { color: var(--lime); }
-.pokie-prog { color: var(--muted); font-weight:800; font-size:12px; letter-spacing:0.1em; text-transform:uppercase; }
+.pl-a { position:absolute; top:50%; transform:translateY(-50%); color:#ffd24a; font-size:14px; text-shadow:0 0 6px #ffae00; }
+.pl-a.left { left:3px } .pl-a.right { right:3px }
+/* glossy glass reflection */
+.pokie-glass {
+  position:absolute; inset:0; pointer-events:none; border-radius:6px;
+  background: linear-gradient(105deg, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.04) 22%, transparent 46%);
+}
+.pokie-foot { text-align:center; color:#fff; font-weight:700; font-size:14px; padding-top:12px; text-shadow:0 1px 2px rgba(0,0,0,0.5); }
+.pokie-foot b { color:#ffe9a8; }
+.pokie-prog { text-align:center; color: rgba(255,255,255,0.7); font-weight:800; font-size:12px; letter-spacing:0.1em; text-transform:uppercase; }
+.coin-slot {
+  width:64px; height:8px; margin:12px auto 0; border-radius:6px;
+  background: linear-gradient(180deg, #2a0610, #000); box-shadow: inset 0 2px 4px rgba(0,0,0,0.9), 0 1px 0 rgba(255,255,255,0.15);
+}
+
+/* the pull handle */
+.lever { position:absolute; right:-30px; top:84px; width:34px; height:160px; transform-origin: 50% 0; }
+.lever-rod {
+  width:9px; height:120px; margin:0 auto;
+  background: linear-gradient(90deg, #6b6b6b, #f2f2f2 45%, #9a9a9a 70%, #5a5a5a);
+  border-radius:6px; box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+}
+.lever-ball {
+  width:32px; height:32px; margin:-8px auto 0; border-radius:50%;
+  background: radial-gradient(circle at 34% 28%, #ffb3b3, #e01b1b 46%, #7e0a0a);
+  box-shadow: 0 5px 10px rgba(0,0,0,0.55), inset 0 -3px 6px rgba(0,0,0,0.4);
+}
+.pokie.pull .lever { animation: leverPull .6s cubic-bezier(.3,1.3,.4,1); }
+@keyframes leverPull {
+  0% { transform: rotate(0); }
+  35% { transform: translateY(40px) rotate(8deg); }
+  100% { transform: rotate(0); }
+}
+/* big-win flash while sitting on the winner */
+.pokie.win { animation: winFlash .45s ease-in-out 2; }
+@keyframes winFlash { 50% { box-shadow: 0 26px 70px -16px #000, 0 0 40px 6px rgba(255,210,74,0.7); } }
+.pokie.win .pokie-window { border-color:#fff; box-shadow: inset 0 14px 24px rgba(0,0,0,0.8), inset 0 -14px 24px rgba(0,0,0,0.8), 0 0 0 2px #ffd24a, 0 0 30px rgba(255,210,74,0.8); }
+.pokie.win .bulbs i { animation: bulbBlink .25s infinite; }
+.pokie.win .seven { animation: pulse .3s ease-in-out 3; }
 
 /* ---------- Spectator (no token) ---------- */
 .spectator .admin-only { display:none !important; }
@@ -577,13 +643,15 @@ label.fld { display:block; font-size:12px; font-weight:800; letter-spacing:0.1em
   .mc-score { font-size:18px; min-width:46px; }
   .mc-daylabel #mcLabel { font-size:21px; }
   /* pokie draw on a phone: machine on top, boys list below */
-  .draw2 { flex-direction:column; height:auto; max-height:82vh; width:96vw; gap:12px; }
-  .d2-machine { order:-1; flex:none; }
-  .pokie { --rcell:62px; width:min(300px,86vw); padding:11px; }
-  .reel-cell .rc-flag { font-size:34px; }
+  .draw2 { flex-direction:column; height:auto; max-height:82vh; width:96vw; gap:12px; align-items:center; }
+  .d2-machine { order:-1; flex:none; padding-right:26px; }
+  .pokie { --rcell:58px; width:min(270px,80vw); }
+  .reel-cell .rc-flag { font-size:32px; }
   .reel-cell .rc-name { font-size:14px; }
-  .pokie-marquee { font-size:13px; }
-  .d2-boys { flex:none; max-height:38vh; }
+  .jackpot { font-size:15px; } .seven { font-size:24px; }
+  .lever { right:-24px; top:70px; height:130px; }
+  .lever-rod { height:96px; } .lever-ball { width:26px; height:26px; }
+  .d2-boys { flex:none; width:100%; max-height:40vh; }
   .d2-name { font-size:15px; }
 }
 

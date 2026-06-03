@@ -246,7 +246,7 @@ const reelCellHTML = t => `<div class="reel-cell"><span class="rc-flag">${t.flag
 
 async function spinReel(reel, picked) {
   const T = DATA.teams.length;
-  const K = 26;                                   // random cells before the winner
+  const K = 36;                                   // random cells before the winner (longer travel)
   const strip = [];
   for (let i = 0; i < K; i++) strip.push(DATA.teams[Math.floor(Math.random() * T)]);
   strip.push(picked);                              // index K -> lands on the payline
@@ -263,14 +263,14 @@ async function spinReel(reel, picked) {
   if (skipDraw) { reel.style.transform = `translateY(${finalY}px)`; return; }
 
   reel.classList.add('spinning');
-  reel.style.transition = 'transform 1.8s cubic-bezier(.10,.80,.25,1)';
+  reel.style.transition = 'transform 2.9s cubic-bezier(.16,.74,.16,1)';   // longer, more suspense
   reel.style.transform = `translateY(${finalY}px)`;
-  setTimeout(() => reel.classList.remove('spinning'), 1450);
+  setTimeout(() => reel.classList.remove('spinning'), 2450);
   await new Promise(res => {
     let done = false;
     const fin = () => { if (done) return; done = true; reel.removeEventListener('transitionend', fin); res(); };
     reel.addEventListener('transitionend', fin);
-    setTimeout(fin, 1950);
+    setTimeout(fin, 3050);
   });
 }
 
@@ -302,21 +302,31 @@ async function drawTeams() {
           </div>`).join('')}
       </div>
       <div class="d2-machine">
-        <div class="pokie">
-          <div class="pokie-marquee">⚽ EVERYTHING BUT ⚽</div>
-          <div class="pokie-window">
-            <div class="reel" id="reel"></div>
-            <div class="payline"></div>
+        <div class="pokie" id="pokie">
+          <div class="pokie-crown">
+            <div class="bulbs">${'<i></i>'.repeat(9)}</div>
+            <div class="jackpot">JACKPOT</div>
+            <div class="seven">7<span>7</span>7</div>
           </div>
-          <div class="pokie-foot" id="pokieFoot">Pull the lever…</div>
+          <div class="pokie-body">
+            <div class="pokie-window">
+              <div class="reel" id="reel"></div>
+              <div class="payline"><span class="pl-a left">▶</span><span class="pl-a right">◀</span></div>
+              <div class="pokie-glass"></div>
+            </div>
+            <div class="pokie-foot" id="pokieFoot">Pull the lever…</div>
+            <div class="pokie-prog" id="pokieProg"></div>
+            <div class="coin-slot"></div>
+          </div>
+          <div class="lever" id="lever"><div class="lever-rod"></div><div class="lever-ball"></div></div>
         </div>
-        <div class="pokie-prog" id="pokieProg"></div>
       </div>
     </div>`;
 
   const reel = $('#reel');
   const rows = $$('#d2Boys .d2-boy');
   const foot = $('#pokieFoot'), prog = $('#pokieProg');
+  const pokie = $('#pokie');
 
   let pIdx = 0;
   const deal = async (boy, rowIdx) => {
@@ -329,14 +339,19 @@ async function drawTeams() {
     row.classList.add('on');
     if (!skipDraw) row.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
 
+    if (!skipDraw) { pokie.classList.add('pull'); setTimeout(() => pokie.classList.remove('pull'), 600); }
     await spinReel(reel, picked);
 
     reel.classList.add('hit');
-    setTimeout(() => reel.classList.remove('hit'), 450);
+    pokie.classList.add('win');
+    if (!skipDraw) await sleep(1300);              // sit on the winner for suspense
+    reel.classList.remove('hit');
+    pokie.classList.remove('win');
+
     const tdiv = row.querySelector('.d2-teams');
     tdiv.insertAdjacentHTML('beforeend',
       `<span class="d2-chip pop"><span class="fl">${picked.flag}</span>${esc(picked.name)}</span>`);
-    if (!skipDraw) await sleep(360);
+    if (!skipDraw) await sleep(380);
   };
 
   // equal share to each boy, in the drawn order
