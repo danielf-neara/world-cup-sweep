@@ -629,6 +629,108 @@ function koSideHTML(m, s, w, champ) {
 }
 
 // ============================================================
+//  Match Centre (FotMob-style day-by-day)
+// ============================================================
+let mcDate = null;   // selected day key 'YYYY-MM-DD' (Sydney)
+
+const SYD = 'Australia/Sydney';
+function sydKey(iso) {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: SYD, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(iso));
+}
+function sydTime(iso) {
+  return new Date(iso).toLocaleString('en-AU', { timeZone: SYD, hour: 'numeric', minute: '2-digit', hour12: true });
+}
+function todayKey() { return sydKey(new Date().toISOString()); }
+function addDays(key, n) {
+  const d = new Date(key + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+function dayLabel(key) {
+  const t = todayKey();
+  if (key === t) return 'Today';
+  if (key === addDays(t, 1)) return 'Tomorrow';
+  if (key === addDays(t, -1)) return 'Yesterday';
+  return new Date(key + 'T00:00:00Z').toLocaleDateString('en-AU', { weekday: 'long' });
+}
+function prettyDay(key) {
+  return new Date(key + 'T00:00:00Z').toLocaleDateString('en-AU', { day: 'numeric', month: 'long' });
+}
+function dayKeys() {
+  return [...new Set(schedule().filter(m => m.kickoff).map(m => sydKey(m.kickoff)))].sort();
+}
+function isLive(m) {
+  if (m.status === 'finished' || !m.kickoff) return false;
+  const k = new Date(m.kickoff).getTime();
+  const now = Date.now();
+  return now >= k && now < k + 2.5 * 3600 * 1000;
+}
+const STAGE_LABEL = {
+  group: 'Group Stage', R32: 'Round of 32', R16: 'Round of 16',
+  QF: 'Quarter-finals', SF: 'Semi-finals', '3P': 'Third-place play-off', F: 'Final'
+};
+
+function mcInit() {
+  const keys = dayKeys();
+  const t = todayKey();
+  if (keys.includes(t)) mcDate = t;
+  else mcDate = keys.find(k => k >= t) || keys[keys.length - 1] || t;
+}
+
+function mcSideHTML(m, s, align) {
+  const id = m['t' + s];
+  const name = id ? esc(teamById(id).name) : `<span class="ref">${esc(prettyRef(m['ref' + s]))}</span>`;
+  const flag = id ? teamById(id).flag : '⚽';
+  const tag = id ? ownerTag(id) : '';
+  return align === 'home'
+    ? `<span class="mc-team">${name}</span>${tag}<span class="fl">${flag}</span>`
+    : `<span class="fl">${flag}</span><span class="mc-team">${name}</span>${tag}`;
+}
+function mcRowHTML(m) {
+  const live = isLive(m);
+  const done = m.status === 'finished';
+  const status = done ? 'FT' : (live ? '<span class="mc-live">LIVE</span>' : '');
+  const mid = (done || live)
+    ? `${m.s1}-${m.s2}${m.p1 != null ? `<span class="mc-pen">p${m.p1}-${m.p2}</span>` : ''}`
+    : `<span class="mc-time">${m.kickoff ? sydTime(m.kickoff) : ''}</span>`;
+  return `<div class="mc-row ${live ? 'live' : ''}">
+    <span class="mc-status">${status}</span>
+    <span class="mc-side home">${mcSideHTML(m, '1', 'home')}</span>
+    <span class="mc-score">${mid}</span>
+    <span class="mc-side away">${mcSideHTML(m, '2', 'away')}</span>
+  </div>`;
+}
+function renderMatchCentre() {
+  const wrap = $('#mcList'); if (!wrap) return;
+  if (!mcDate) mcInit();
+  const keys = dayKeys();
+  $('#mcLabel').textContent = dayLabel(mcDate);
+  $('#mcDate').textContent = prettyDay(mcDate);
+  $('#mcPrev').disabled = keys.length ? mcDate <= keys[0] : true;
+  $('#mcNext').disabled = keys.length ? mcDate >= keys[keys.length - 1] : true;
+  $('#mcToday').style.display = (mcDate === todayKey()) ? 'none' : '';
+
+  const day = schedule().filter(m => m.kickoff && sydKey(m.kickoff) === mcDate)
+    .sort((a, b) => (a.kickoff < b.kickoff ? -1 : a.kickoff > b.kickoff ? 1 : a.num - b.num));
+  if (!day.length) {
+    wrap.innerHTML = `<div class="empty">No games on this day. Use the arrows to find the next match day.</div>`;
+    return;
+  }
+  // group by stage, preserving first-kickoff order
+  const order = [], buckets = {};
+  day.forEach(m => { if (!buckets[m.stage]) { buckets[m.stage] = []; order.push(m.stage); } buckets[m.stage].push(m); });
+  wrap.innerHTML = order.map(st =>
+    `<div class="mc-group">
+       <div class="mc-group-h">🏆 FIFA World Cup · ${STAGE_LABEL[st] || st}</div>
+       ${buckets[st].map(mcRowHTML).join('')}
+     </div>`).join('');
+}
+function mcStep(n) {
+  if (!mcDate) mcInit();
+  mcDate = addDays(mcDate, n);
+  renderMatchCentre();
+}
+
+// ============================================================
 //  View routing
 // ============================================================
 const VIEW_KEY = 'wcs_view';
@@ -670,6 +772,7 @@ function renderAll() {
   document.body.classList.toggle('spectator', !canEdit());
   $('#subtitle').textContent = DATA.meta.subtitle || '';
   renderDrawTab();
+  renderMatchCentre();
   renderGroups();
   renderKnockout();
   renderStandings();
@@ -782,6 +885,11 @@ async function init() {
     switchView('draw');
   });
   $('#stageSkip').addEventListener('click', () => { skipDraw = true; });
+
+  // match centre day navigation
+  $('#mcPrev').addEventListener('click', () => mcStep(-1));
+  $('#mcNext').addEventListener('click', () => mcStep(1));
+  $('#mcToday').addEventListener('click', () => { mcDate = todayKey(); renderMatchCentre(); });
 
   // settings
   $('#cfgSave').addEventListener('click', () => { readCfgInputs(); saveCfg(); renderAll(); toast('Config saved'); $('#cfgStatus').textContent = 'Config saved to this browser.'; });

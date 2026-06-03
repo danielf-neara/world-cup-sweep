@@ -32,6 +32,7 @@
 
     <nav class="tabs">
       <button data-view="draw" class="active">The Draw</button>
+      <button data-view="matches">Match Centre</button>
       <button data-view="groups">Groups</button>
       <button data-view="knockout">Knockout</button>
       <button data-view="standings">Standings</button>
@@ -93,6 +94,23 @@
         <p class="hint">Ranked by teams still alive in the tournament. Knocked-out teams are struck through.</p>
         <div class="board" id="standingsBoard"></div>
       </div>
+    </section>
+
+    <!-- ============ MATCH CENTRE ============ -->
+    <section class="view" id="view-matches">
+      <div class="mc-daynav">
+        <button class="mc-arrow" id="mcPrev" title="Previous day">‹</button>
+        <div class="mc-daylabel">
+          <span id="mcLabel">Today</span>
+          <span id="mcDate"></span>
+        </div>
+        <button class="mc-arrow" id="mcNext" title="Next day">›</button>
+      </div>
+      <div style="text-align:center; margin-bottom:14px;">
+        <button class="mc-today" id="mcToday">Jump to today</button>
+      </div>
+      <div id="mcList"></div>
+      <p class="help" style="text-align:center; margin-top:14px;">All times in Sydney (AEST). Results auto-update during the tournament.</p>
     </section>
 
     <!-- ============ GROUPS ============ -->
