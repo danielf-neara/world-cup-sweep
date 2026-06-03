@@ -24,13 +24,15 @@ let skipDraw = false;
 // ============================================================
 //  Config (GitHub sync)
 // ============================================================
+// This site's own repo — pre-filled so the admin only has to paste a token.
+const DEFAULT_REPO = { owner: 'danielf-neara', repo: 'world-cup-sweep', branch: 'main', path: 'data.json' };
 function loadCfg() {
   try { CFG = JSON.parse(localStorage.getItem(CFG_KEY)) || {}; }
   catch { CFG = {}; }
-  CFG.owner  = CFG.owner  || '';
-  CFG.repo   = CFG.repo   || '';
-  CFG.branch = CFG.branch || 'main';
-  CFG.path   = CFG.path   || 'data.json';
+  CFG.owner  = CFG.owner  || DEFAULT_REPO.owner;
+  CFG.repo   = CFG.repo   || DEFAULT_REPO.repo;
+  CFG.branch = CFG.branch || DEFAULT_REPO.branch;
+  CFG.path   = CFG.path   || DEFAULT_REPO.path;
   CFG.token  = CFG.token  || '';
 }
 function saveCfg() { localStorage.setItem(CFG_KEY, JSON.stringify(CFG)); }
