@@ -1,6 +1,6 @@
 # World Cup '26 Sweep
 
-A GitHub Pages sweepstake app for the 2026 FIFA World Cup. Built for me and the boys.
+A GitHub Pages sweepstake app for the 2026 FIFA World Cup. Built for the **Everything But** group.
 
 - **48 teams**, 12 groups of 4 (the real 2026 final draw).
 - **Animated live draw** — shuffles the draw order, then deals every team out slot-machine style.
