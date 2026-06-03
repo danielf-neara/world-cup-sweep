@@ -314,6 +314,12 @@ function boyCardHTML(boy, pos, opts = {}) {
 
 function renderBoard() {
   const wrap = $('#board');
+  if (!(DATA.draw.completed && DATA.draw.order.length)) {
+    wrap.innerHTML = `<div class="empty">⚽ The draw hasn't been done yet — check back soon.</div>`;
+    $('#boardSub').textContent = '';
+    $('#winnerBannerSlot').innerHTML = '';
+    return;
+  }
   wrap.innerHTML = DATA.draw.order.map(b => boyCardHTML(b)).join('');
   $('#boardSub').textContent = `${DATA.draw.order.length} boys · ${DATA.teams.length} teams · whoever owns the champion wins`;
   renderWinnerBanner('#winnerBannerSlot');
@@ -379,10 +385,10 @@ function teamAdminHTML(t, editable) {
     <span class="fl">${t.flag}</span>
     <span class="nm">${esc(t.name)}</span>
     ${owner ? `<span class="owner">${esc(owner)}</span>` : ''}
-    <span class="acts">
+    ${editable ? `<span class="acts">
       <button class="mini ${t.status === 'out' ? '' : 'on-out'}" data-act="toggle" data-id="${t.id}" title="${t.status === 'out' ? 'Revive' : 'Knock out'}">${t.status === 'out' ? '↺' : '✕'}</button>
       <button class="mini ${isChamp ? 'on-champ' : ''}" data-act="champ" data-id="${t.id}" title="Crown champion">👑</button>
-    </span>
+    </span>` : (isChamp ? '<span class="crown">👑</span>' : t.status === 'out' ? '<span class="owner" style="color:var(--magenta)">OUT</span>' : '')}
   </div>`;
 }
 function ownerOf(teamId) {
@@ -573,12 +579,17 @@ function switchView(name) {
 }
 function renderDrawTab() {
   const done = DATA.draw.completed && DATA.draw.order.length;
-  $('#drawSetup').style.display   = done ? 'none' : 'block';
-  $('#drawResults').style.display = done ? 'block' : 'none';
-  if (done) renderBoard(); else renderBoysSetup();
+  const admin = canEdit();
+  // Admin with no draw yet -> setup form. Everyone else -> the board
+  // (which shows a friendly "not done yet" message until the draw happens).
+  const showSetup = !done && admin;
+  $('#drawSetup').style.display   = showSetup ? 'block' : 'none';
+  $('#drawResults').style.display = showSetup ? 'none' : 'block';
+  if (showSetup) renderBoysSetup(); else renderBoard();
 }
 
 function renderAll() {
+  document.body.classList.toggle('spectator', !canEdit());
   $('#subtitle').textContent = DATA.meta.subtitle || '';
   renderDrawTab();
   renderGroups();

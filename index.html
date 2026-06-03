@@ -2,9 +2,17 @@
 <html lang="en-AU">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>World Cup '26 Sweep</title>
   <meta name="description" content="World Cup 2026 sweepstake — last team standing." />
+  <meta name="theme-color" content="#06120c" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="WC '26 Sweep" />
+  <meta property="og:title" content="World Cup '26 Sweep — Everything But" />
+  <meta property="og:description" content="Last team standing takes the pot. Track the draw, groups, and knockout bracket." />
+  <meta name="twitter:card" content="summary" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="style.css" />
@@ -56,7 +64,7 @@
             <h2 style="font-family:var(--display); text-transform:uppercase; font-size:28px;">The Draw Is In</h2>
             <p class="hint" style="margin:0;" id="boardSub"></p>
           </div>
-          <button class="btn btn-ghost" id="redraw">↻ Re-run draw</button>
+          <button class="btn btn-ghost admin-only" id="redraw">↻ Re-run draw</button>
         </div>
         <div class="board" id="board"></div>
       </div>
@@ -134,7 +142,7 @@
         </p>
       </div>
 
-      <div class="panel">
+      <div class="panel admin-only">
         <h2>Local Backup</h2>
         <p class="hint">Export or import the whole sweep as a JSON file.</p>
         <div class="row-actions">
@@ -144,7 +152,7 @@
         </div>
       </div>
 
-      <div class="panel">
+      <div class="panel admin-only">
         <h2 style="color:var(--magenta);">Danger Zone</h2>
         <p class="hint">Reset the draw (keeps the boys and teams) or wipe everything back to a fresh tournament.</p>
         <div class="row-actions">
