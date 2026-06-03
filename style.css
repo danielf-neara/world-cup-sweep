@@ -481,6 +481,69 @@ label.fld { display:block; font-size:12px; font-weight:800; letter-spacing:0.1em
   letter-spacing:0.14em; text-transform:uppercase; color: var(--dim); margin-top:2px;
 }
 
+/* ---------- Draw 2: the pokie ---------- */
+.draw2 { display:flex; gap:20px; width:min(980px, 94vw); height:min(72vh, 600px); }
+.d2-boys {
+  flex:1.05; overflow-y:auto; display:flex; flex-direction:column; gap:8px;
+  padding-right:6px; scrollbar-width:thin;
+}
+.d2-boy {
+  background: var(--surface); border:1px solid var(--line-soft); border-radius:12px;
+  padding:10px 13px; transition: border-color .2s, box-shadow .2s, background .2s; text-align:left;
+}
+.d2-boy.on {
+  border-color: var(--lime); background: var(--surface-2);
+  box-shadow: 0 0 0 1px var(--lime), 0 0 26px -6px var(--lime);
+}
+.d2-name {
+  font-family: var(--display); text-transform:uppercase; font-size:17px; letter-spacing:0.02em;
+  display:block; margin-bottom:6px; color: var(--text);
+}
+.d2-boy.on .d2-name { color: var(--lime); }
+.d2-teams { display:flex; flex-wrap:wrap; gap:5px; min-height:4px; }
+.d2-chip {
+  display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:700;
+  background: var(--pitch); border:1px solid var(--line-soft); border-radius:100px; padding:4px 9px;
+}
+.d2-chip .fl { font-size:15px; }
+.d2-chip.pop { animation: chippop .42s cubic-bezier(.2,1.5,.4,1); }
+@keyframes chippop { from { transform:scale(.35); opacity:0; } to { transform:scale(1); opacity:1; } }
+
+.d2-machine { flex:.95; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; }
+.pokie {
+  --rcell: 92px;
+  width:min(330px, 82vw);
+  background: linear-gradient(180deg, #2a0f3a, #140720);
+  border:3px solid var(--gold); border-radius:22px; padding:14px;
+  box-shadow: 0 24px 60px -15px #000, inset 0 0 32px rgba(255,206,58,0.12);
+}
+.pokie-marquee {
+  text-align:center; font-family: var(--display); letter-spacing:0.1em; color: var(--gold);
+  font-size:15px; padding-bottom:10px; text-shadow: 0 0 12px rgba(255,206,58,0.6);
+}
+.pokie-window {
+  position:relative; height: calc(var(--rcell) * 3); overflow:hidden; border-radius:12px;
+  background: linear-gradient(180deg, #0b0410, #1c0d2c, #0b0410);
+  border:2px solid rgba(255,206,58,0.4);
+  box-shadow: inset 0 12px 22px rgba(0,0,0,0.75), inset 0 -12px 22px rgba(0,0,0,0.75);
+}
+.reel { will-change: transform; }
+.reel.spinning { filter: blur(0.7px); }
+.reel.hit { filter: drop-shadow(0 0 14px var(--lime)); }
+.reel-cell {
+  height: var(--rcell); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+}
+.reel-cell .rc-flag { font-size:46px; line-height:1; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5)); }
+.reel-cell .rc-name { font-family: var(--display); text-transform:uppercase; font-size:17px; color:#fff; }
+.payline {
+  position:absolute; top:50%; left:0; right:0; height: var(--rcell); transform: translateY(-50%);
+  border-top:2px solid var(--magenta); border-bottom:2px solid var(--magenta);
+  box-shadow: 0 0 18px rgba(255,46,116,0.5); pointer-events:none;
+}
+.pokie-foot { text-align:center; color: var(--text); font-weight:700; font-size:14px; padding-top:10px; }
+.pokie-foot b { color: var(--lime); }
+.pokie-prog { color: var(--muted); font-weight:800; font-size:12px; letter-spacing:0.1em; text-transform:uppercase; }
+
 /* ---------- Spectator (no token) ---------- */
 .spectator .admin-only { display:none !important; }
 
@@ -513,6 +576,15 @@ label.fld { display:block; font-size:12px; font-weight:800; letter-spacing:0.1em
   .mc-side .fl { font-size:19px; }
   .mc-score { font-size:18px; min-width:46px; }
   .mc-daylabel #mcLabel { font-size:21px; }
+  /* pokie draw on a phone: machine on top, boys list below */
+  .draw2 { flex-direction:column; height:auto; max-height:82vh; width:96vw; gap:12px; }
+  .d2-machine { order:-1; flex:none; }
+  .pokie { --rcell:62px; width:min(300px,86vw); padding:11px; }
+  .reel-cell .rc-flag { font-size:34px; }
+  .reel-cell .rc-name { font-size:14px; }
+  .pokie-marquee { font-size:13px; }
+  .d2-boys { flex:none; max-height:38vh; }
+  .d2-name { font-size:15px; }
 }
 
 /* tap targets: avoid iOS zoom on focus (needs >=16px) and give breathing room */

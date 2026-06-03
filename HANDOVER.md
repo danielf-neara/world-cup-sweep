@@ -40,7 +40,7 @@ Scoring is **last team standing**: whoever owns the eventual champion wins the p
 ## How the draw works (two separate draws)
 
 - **Draw 1 — "Draw the order"** (`drawOrder()`): random shuffle of the boys, animated, locks the running order, saves.
-- **Draw 2 — "Draw the teams"** (`drawTeams()`): deals the 48 teams slot-machine style **in the drawn order**.
+- **Draw 2 — "Draw the teams"** (`drawTeams()`): a **pokie/slot-machine** animation — boys listed down the left, a spinning vertical reel (`spinReel()`) on the right; each locked team pops into the on-the-clock boy's row so the board fills up live. Deals **in the drawn order**.
 - **Equal split + the pot:** every boy gets `floor(48 / N)` teams. Any leftovers go to
   **"40th Trip"** (`HOUSE` constant) — the pot, shown as its own gold card.
   - 12 boys → 4 each, 40th Trip 0. 13 → 3 each, 40th Trip 9. 11 → 4 each, 40th Trip 4.

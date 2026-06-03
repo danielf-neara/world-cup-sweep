@@ -241,7 +241,39 @@ async function drawOrder() {
   toast(canEdit() ? 'Order saved ✓ — now draw the teams' : 'Order set (local only)');
 }
 
-// ---- Draw 2 of 2: the team allocation ----
+// ---- Draw 2 of 2: the team allocation (pokie machine) ----
+const reelCellHTML = t => `<div class="reel-cell"><span class="rc-flag">${t.flag}</span><span class="rc-name">${esc(t.name)}</span></div>`;
+
+async function spinReel(reel, picked) {
+  const T = DATA.teams.length;
+  const K = 26;                                   // random cells before the winner
+  const strip = [];
+  for (let i = 0; i < K; i++) strip.push(DATA.teams[Math.floor(Math.random() * T)]);
+  strip.push(picked);                              // index K -> lands on the payline
+  strip.push(DATA.teams[Math.floor(Math.random() * T)]);  // one below, to centre it
+  reel.innerHTML = strip.map(reelCellHTML).join('');
+
+  const cellH = reel.firstElementChild.getBoundingClientRect().height || 92;
+  const finalY = -((K - 1) * cellH);               // centre the winner in the 3-cell window
+
+  reel.style.transition = 'none';
+  reel.style.transform = 'translateY(0)';
+  reel.getBoundingClientRect();                    // force reflow
+
+  if (skipDraw) { reel.style.transform = `translateY(${finalY}px)`; return; }
+
+  reel.classList.add('spinning');
+  reel.style.transition = 'transform 1.8s cubic-bezier(.10,.80,.25,1)';
+  reel.style.transform = `translateY(${finalY}px)`;
+  setTimeout(() => reel.classList.remove('spinning'), 1450);
+  await new Promise(res => {
+    let done = false;
+    const fin = () => { if (done) return; done = true; reel.removeEventListener('transitionend', fin); res(); };
+    reel.addEventListener('transitionend', fin);
+    setTimeout(fin, 1950);
+  });
+}
+
 async function drawTeams() {
   const order = (DATA.draw && DATA.draw.order) || [];
   if (order.length < 2) return;
@@ -250,60 +282,82 @@ async function drawTeams() {
   const stage = $('#stage');
   stage.classList.add('show');
   const phase = $('#stagePhase'), onClock = $('#stageOnClock'), bodyEl = $('#stageBody');
+  phase.textContent = ''; onClock.innerHTML = '';
 
   const T = DATA.teams.length, n = order.length;
   const per = Math.floor(T / n), rem = T - per * n;   // equal per boy, rest to 40th Trip
   const alloc = {}; order.forEach(b => alloc[b] = []);
   const pool = shuffle(DATA.teams.map(t => t.id));
 
+  const panel = [...order];
+  if (rem > 0) panel.push(HOUSE);
+
   bodyEl.innerHTML = `
-    <div class="slot" id="slot">
-      <div class="flag" id="slotFlag">⚽</div>
-      <div class="tname" id="slotName">&nbsp;</div>
+    <div class="draw2">
+      <div class="d2-boys" id="d2Boys">
+        ${panel.map((b, i) => `
+          <div class="d2-boy" data-idx="${i}">
+            <span class="d2-name">${b === HOUSE ? '🏖️ ' : ''}${esc(b)}</span>
+            <div class="d2-teams"></div>
+          </div>`).join('')}
+      </div>
+      <div class="d2-machine">
+        <div class="pokie">
+          <div class="pokie-marquee">⚽ EVERYTHING BUT ⚽</div>
+          <div class="pokie-window">
+            <div class="reel" id="reel"></div>
+            <div class="payline"></div>
+          </div>
+          <div class="pokie-foot" id="pokieFoot">Pull the lever…</div>
+        </div>
+        <div class="pokie-prog" id="pokieProg"></div>
+      </div>
     </div>`;
-  const slot = $('#slot'), slotFlag = $('#slotFlag'), slotName = $('#slotName');
-  const setSlot = t => { slotFlag.textContent = t.flag; slotName.textContent = t.name; };
+
+  const reel = $('#reel');
+  const rows = $$('#d2Boys .d2-boy');
+  const foot = $('#pokieFoot'), prog = $('#pokieProg');
 
   let pIdx = 0;
-  const spin = async (picked, who) => {
-    phase.textContent = `Draw 2 of 2 · Pick ${pIdx} of ${T}`;
-    onClock.innerHTML = `On the clock: <em>${esc(who)}</em>`;
-    if (skipDraw) return;
-    slot.classList.remove('locked');
-    for (let s = 0; s < 16 && !skipDraw; s++) {
-      setSlot(DATA.teams[Math.floor(Math.random() * T)]);
-      await sleep(38 + s * 9);
-    }
-    setSlot(picked);
-    slot.classList.add('locked');
-    await sleep(620);
+  const deal = async (boy, rowIdx) => {
+    const picked = teamById(pool[pIdx++]);
+    alloc[boy].push(picked.id);
+    prog.textContent = `Pick ${pIdx} of ${T}`;
+    foot.innerHTML = `🎰 <b>${boy === HOUSE ? '40th Trip' : esc(boy)}</b> on the clock`;
+    rows.forEach(r => r.classList.remove('on'));
+    const row = rows[rowIdx];
+    row.classList.add('on');
+    if (!skipDraw) row.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+
+    await spinReel(reel, picked);
+
+    reel.classList.add('hit');
+    setTimeout(() => reel.classList.remove('hit'), 450);
+    const tdiv = row.querySelector('.d2-teams');
+    tdiv.insertAdjacentHTML('beforeend',
+      `<span class="d2-chip pop"><span class="fl">${picked.flag}</span>${esc(picked.name)}</span>`);
+    if (!skipDraw) await sleep(360);
   };
 
   // equal share to each boy, in the drawn order
   for (let round = 0; round < per; round++) {
-    for (const boy of order) {
-      const picked = teamById(pool[pIdx++]);
-      alloc[boy].push(picked.id);
-      await spin(picked, boy);
-    }
+    for (let i = 0; i < n; i++) await deal(order[i], i);
   }
   // leftovers to 40th Trip
   if (rem > 0) {
     alloc[HOUSE] = [];
-    for (let k = 0; k < rem; k++) {
-      const picked = teamById(pool[pIdx++]);
-      alloc[HOUSE].push(picked.id);
-      await spin(picked, `${HOUSE} 🏖️`);
-    }
+    const houseIdx = panel.length - 1;
+    for (let k = 0; k < rem; k++) await deal(HOUSE, houseIdx);
   }
 
   DATA.draw = { completed: true, order, allocations: alloc };
   DATA.champion = null;
   DATA.teams.forEach(t => t.status = 'alive');
 
-  phase.textContent = '';
-  onClock.innerHTML = `That's the draw! <em>Good luck boys</em> ⚽`;
-  if (!skipDraw) { fireConfetti(); await sleep(1400); }
+  rows.forEach(r => r.classList.remove('on'));
+  foot.innerHTML = `That's the draw! Good luck boys ⚽`;
+  prog.textContent = '';
+  if (!skipDraw) { fireConfetti(); await sleep(1600); }
 
   stage.classList.remove('show');
   switchView('draw');
