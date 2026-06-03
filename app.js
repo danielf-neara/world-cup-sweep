@@ -405,6 +405,166 @@ async function onTeamAction(e) {
 }
 
 // ============================================================
+//  Schedule · Groups · Knockout
+// ============================================================
+const schedule = () => Array.isArray(DATA.schedule) ? DATA.schedule : [];
+
+function boyColor(name) {
+  let h = 0;
+  for (const c of name) h = (h * 31 + c.charCodeAt(0)) % 360;
+  return `hsl(${h} 72% 62%)`;
+}
+function ownerTag(teamId) {
+  const o = ownerOf(teamId);
+  if (!o) return '';
+  return `<span class="otag" style="--oc:${boyColor(o)}" title="${esc(o)}">${esc(o)}</span>`;
+}
+function fmtDate(d) {
+  if (!d) return '';
+  const dt = new Date(d + 'T00:00:00');
+  return isNaN(dt) ? '' : dt.toLocaleDateString('en-AU', { day: 'numeric', month: 'short' });
+}
+function prettyRef(r) {
+  if (!r) return 'TBD';
+  if (/^1[A-L]$/.test(r)) return 'Winner Grp ' + r[1];
+  if (/^2[A-L]$/.test(r)) return 'Runner-up Grp ' + r[1];
+  if (/^3/.test(r))       return '3rd: ' + r.slice(1);
+  if (/^W\d+/.test(r))    return 'Winner M' + r.slice(1);
+  if (/^L\d+/.test(r))    return 'Loser M' + r.slice(1);
+  return r;
+}
+
+// ---- group standings ----
+function computeGroup(letter) {
+  const row = {};
+  DATA.teams.filter(t => t.group === letter)
+    .forEach(t => row[t.id] = { id: t.id, p: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, gd: 0, pts: 0 });
+  schedule()
+    .filter(m => m.stage === 'group' && m.group === letter && m.status === 'finished' && m.t1 && m.t2 && m.s1 != null)
+    .forEach(m => {
+      const a = row[m.t1], b = row[m.t2]; if (!a || !b) return;
+      a.p++; b.p++; a.gf += m.s1; a.ga += m.s2; b.gf += m.s2; b.ga += m.s1;
+      if (m.s1 > m.s2) { a.w++; b.l++; a.pts += 3; }
+      else if (m.s1 < m.s2) { b.w++; a.l++; b.pts += 3; }
+      else { a.d++; b.d++; a.pts++; b.pts++; }
+    });
+  Object.values(row).forEach(r => r.gd = r.gf - r.ga);
+  return Object.values(row).sort((x, y) =>
+    y.pts - x.pts || y.gd - x.gd || y.gf - x.gf ||
+    teamById(x.id).name.localeCompare(teamById(y.id).name));
+}
+
+function renderGroups() {
+  const grid = $('#groupsGrid'); if (!grid) return;
+  const groups = [...new Set(DATA.teams.map(t => t.group))].sort();
+  const gm = schedule().filter(m => m.stage === 'group');
+  const played = gm.filter(m => m.status === 'finished').length;
+  $('#groupsProgress').innerHTML = `<b>${played}</b> / ${gm.length} played`;
+  grid.className = 'groups-grid';
+  grid.innerHTML = groups.map(groupCardHTML).join('');
+}
+function groupCardHTML(g) {
+  const rows = computeGroup(g);
+  const trs = rows.map((r, i) => {
+    const t = teamById(r.id);
+    const qual = i < 2 ? 'qual' : (i === 2 ? 'third' : '');
+    const dead = t.status === 'out' ? 'dead' : '';
+    return `<tr class="${qual} ${dead}">
+      <td class="pos">${i + 1}</td>
+      <td class="tm"><span class="fl">${t.flag}</span><span class="nm">${esc(t.name)}</span>${ownerTag(t.id)}</td>
+      <td>${r.p}</td><td class="hs">${r.w}</td><td class="hs">${r.d}</td><td class="hs">${r.l}</td>
+      <td class="hs">${r.gf}</td><td class="hs">${r.ga}</td><td>${r.gd > 0 ? '+' : ''}${r.gd}</td><td class="pts">${r.pts}</td></tr>`;
+  }).join('');
+  const fx = schedule().filter(m => m.stage === 'group' && m.group === g).map(fixtureRowHTML).join('');
+  return `<div class="group-card">
+    <h3>Group ${g}</h3>
+    <table class="standings-tbl">
+      <thead><tr><th></th><th></th><th>P</th><th class="hs">W</th><th class="hs">D</th><th class="hs">L</th><th class="hs">GF</th><th class="hs">GA</th><th>GD</th><th>Pts</th></tr></thead>
+      <tbody>${trs}</tbody>
+    </table>
+    <details class="fixtures"><summary>Fixtures (${schedule().filter(m => m.stage === 'group' && m.group === g).length})</summary>${fx}</details>
+  </div>`;
+}
+function sideLabel(m, s) {
+  const id = m['t' + s];
+  if (id) { const t = teamById(id); return `<span class="fl">${t.flag}</span> ${esc(t.name)}`; }
+  return `<span class="ref">${esc(prettyRef(m['ref' + s]))}</span>`;
+}
+function pen(m) { return m.p1 != null ? ` <span class="kp">(pens ${m.p1}-${m.p2})</span>` : ''; }
+function fixtureRowHTML(m) {
+  const mid = m.status === 'finished'
+    ? `<b>${m.s1}-${m.s2}</b>${pen(m)}`
+    : `<span class="v">v</span>`;
+  return `<div class="fx"><span class="fxd">${fmtDate(m.date)}</span>
+    <span class="fa">${sideLabel(m, '1')}</span><span class="fm">${mid}</span><span class="fb">${sideLabel(m, '2')}</span></div>`;
+}
+
+// ---- knockout bracket ----
+function knockoutWinnerId(m) {
+  if (m.status !== 'finished' || !m.t1 || !m.t2) return null;
+  let a = m.s1, b = m.s2;
+  if (m.p1 != null && a === b) { a = m.p1; b = m.p2; }
+  if (a === b) return null;
+  return a > b ? m.t1 : m.t2;
+}
+function bracketOrder() {
+  const by = {}; schedule().forEach(m => by[m.num] = m);
+  const order = { R32: [], R16: [], QF: [], SF: [], F: [] };
+  const kids = m => [m.ref1, m.ref2].filter(r => r && /^W\d+/.test(r)).map(r => +r.slice(1));
+  const seen = new Set();
+  (function visit(num) {
+    const m = by[num]; if (!m || seen.has(num)) return; seen.add(num);
+    kids(m).forEach(visit);
+    if (order[m.stage]) order[m.stage].push(num);
+  })((schedule().find(m => m.stage === 'F') || {}).num);
+  // fallback for any round the tree-walk missed
+  ['R32', 'R16', 'QF', 'SF', 'F'].forEach(st => {
+    if (!order[st].length)
+      order[st] = schedule().filter(m => m.stage === st).sort((a, b) => a.num - b.num).map(m => m.num);
+  });
+  return { order, by };
+}
+function renderKnockout() {
+  const wrap = $('#bracket'); if (!wrap) return;
+  const { order, by } = bracketOrder();
+  const ko = schedule().filter(m => ['R32', 'R16', 'QF', 'SF', 'F'].includes(m.stage));
+  const played = ko.filter(m => m.status === 'finished').length;
+  $('#knockoutProgress').innerHTML = `<b>${played}</b> / ${ko.length} ties played`;
+  const cols = [['R32', 'Round of 32'], ['R16', 'Round of 16'], ['QF', 'Quarter-finals'], ['SF', 'Semi-finals'], ['F', 'Final']];
+  wrap.innerHTML = cols.map(([st, label]) =>
+    `<div class="bcol">
+       <div class="bcol-h">${label}</div>
+       <div class="bcol-body">${(order[st] || []).map(n => koMatchHTML(by[n])).join('')}</div>
+     </div>`).join('');
+  const tp = schedule().find(m => m.stage === '3P');
+  $('#thirdPlaceSlot').innerHTML = tp
+    ? `<div class="panel third-place"><h3>Third-place play-off</h3>${koMatchHTML(tp, true)}</div>` : '';
+}
+function koMatchHTML(m, flat) {
+  if (!m) return '';
+  const w = knockoutWinnerId(m);
+  const champ = m.stage === 'F' && w;
+  return `<div class="ko ${flat ? 'ko-flat' : ''}">
+    ${koSideHTML(m, '1', w, champ)}
+    ${koSideHTML(m, '2', w, champ)}
+    <span class="ko-num">M${m.num} · ${fmtDate(m.date)}</span>
+  </div>`;
+}
+function koSideHTML(m, s, w, champ) {
+  const id = m['t' + s];
+  const isW = id && id === w;
+  const score = m.status === 'finished' ? (s === '1' ? m.s1 : m.s2) : '';
+  const penTxt = m.p1 != null ? ` <span class="kp">(${s === '1' ? m.p1 : m.p2})</span>` : '';
+  let inner;
+  if (id) { const t = teamById(id); inner = `<span class="fl">${t.flag}</span><span class="nm">${esc(t.name)}</span>${ownerTag(id)}`; }
+  else inner = `<span class="ref">${esc(prettyRef(m['ref' + s]))}</span>`;
+  return `<div class="ko-side ${isW ? 'win' : ''} ${id && w && !isW ? 'lose' : ''}">
+    <span class="ko-team">${inner}${isW && champ ? ' <span class="kc">👑</span>' : ''}</span>
+    <span class="ko-score">${score}${score !== '' ? penTxt : ''}</span>
+  </div>`;
+}
+
+// ============================================================
 //  View routing
 // ============================================================
 function switchView(name) {
@@ -421,6 +581,8 @@ function renderDrawTab() {
 function renderAll() {
   $('#subtitle').textContent = DATA.meta.subtitle || '';
   renderDrawTab();
+  renderGroups();
+  renderKnockout();
   renderStandings();
   renderTeamsAdmin();
   renderSyncStatus();

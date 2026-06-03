@@ -24,6 +24,8 @@
 
     <nav class="tabs">
       <button data-view="draw" class="active">The Draw</button>
+      <button data-view="groups">Groups</button>
+      <button data-view="knockout">Knockout</button>
       <button data-view="standings">Standings</button>
       <button data-view="teams">Teams</button>
       <button data-view="settings">Settings</button>
@@ -68,6 +70,35 @@
         <p class="hint">Ranked by teams still alive in the tournament. Knocked-out teams are struck through.</p>
         <div class="board" id="standingsBoard"></div>
       </div>
+    </section>
+
+    <!-- ============ GROUPS ============ -->
+    <section class="view" id="view-groups">
+      <div class="panel" style="margin-bottom:18px;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px;">
+          <div>
+            <h2>Group Stage</h2>
+            <p class="hint" id="groupsHint" style="margin:0;">12 groups of four. Top two plus the eight best third-placed teams reach the Round of 32.</p>
+          </div>
+          <span class="count-chip" id="groupsProgress"></span>
+        </div>
+      </div>
+      <div id="groupsGrid"></div>
+    </section>
+
+    <!-- ============ KNOCKOUT ============ -->
+    <section class="view" id="view-knockout">
+      <div class="panel" style="margin-bottom:18px;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px;">
+          <div>
+            <h2>Knockout Bracket</h2>
+            <p class="hint" style="margin:0;">Round of 32 through to the Final. Teams fill in as the groups finish. Scroll across →</p>
+          </div>
+          <span class="count-chip" id="knockoutProgress"></span>
+        </div>
+      </div>
+      <div class="bracket-scroll"><div class="bracket" id="bracket"></div></div>
+      <div id="thirdPlaceSlot"></div>
     </section>
 
     <!-- ============ TEAMS ============ -->
