@@ -2,7 +2,7 @@
   "meta": {
     "title": "World Cup '26 Sweep",
     "subtitle": "Everything But · Last Team Standing",
-    "lastUpdated": "2026-06-03T23:23:24.158Z",
+    "lastUpdated": "2026-06-03T23:27:14.189Z",
     "lastResultSync": "2026-06-03T05:47:55.918919+00:00"
   },
   "teams": [
@@ -353,7 +353,7 @@
     "7"
   ],
   "draw": {
-    "completed": false,
+    "completed": true,
     "order": [
       "3",
       "6",
@@ -363,7 +363,72 @@
       "1",
       "4"
     ],
-    "allocations": {}
+    "allocations": {
+      "1": [
+        "aut",
+        "col",
+        "cze",
+        "bel",
+        "tun",
+        "cro"
+      ],
+      "2": [
+        "rsa",
+        "egy",
+        "swe",
+        "jpn",
+        "nzl",
+        "cod"
+      ],
+      "3": [
+        "eng",
+        "nor",
+        "ksa",
+        "irq",
+        "hai",
+        "mar"
+      ],
+      "4": [
+        "irn",
+        "ned",
+        "kor",
+        "ger",
+        "tur",
+        "uru"
+      ],
+      "5": [
+        "pan",
+        "usa",
+        "sui",
+        "por",
+        "cpv",
+        "civ"
+      ],
+      "6": [
+        "ecu",
+        "arg",
+        "fra",
+        "uzb",
+        "cur",
+        "qat"
+      ],
+      "7": [
+        "par",
+        "sco",
+        "gha",
+        "aus",
+        "jor",
+        "mex"
+      ],
+      "40th Trip": [
+        "sen",
+        "can",
+        "bih",
+        "esp",
+        "bra",
+        "alg"
+      ]
+    }
   },
   "champion": null,
   "schedule": [
