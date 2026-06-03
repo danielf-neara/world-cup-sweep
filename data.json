@@ -2,7 +2,7 @@
   "meta": {
     "title": "World Cup '26 Sweep",
     "subtitle": "Everything But · Last Team Standing",
-    "lastUpdated": "2026-06-03T23:21:00.004Z",
+    "lastUpdated": "2026-06-03T23:23:24.158Z",
     "lastResultSync": "2026-06-03T05:47:55.918919+00:00"
   },
   "teams": [
@@ -344,11 +344,25 @@
     }
   ],
   "boys": [
-    ""
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7"
   ],
   "draw": {
     "completed": false,
-    "order": [],
+    "order": [
+      "3",
+      "6",
+      "5",
+      "7",
+      "2",
+      "1",
+      "4"
+    ],
     "allocations": {}
   },
   "champion": null,
