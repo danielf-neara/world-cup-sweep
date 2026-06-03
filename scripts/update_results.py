@@ -20,7 +20,9 @@ Usage:
 import json
 import sys
 import os
+import re
 import urllib.request
+from datetime import datetime, timedelta, timezone
 
 HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_PATH = os.path.join(HERE, "data.json")
@@ -76,6 +78,25 @@ def build(data, of):
         p2 = pn[1] if pn else None
         return (s1, s2, p1, p2)
 
+    def kickoff_utc(date, time_str):
+        """openfootball stores venue-local time + offset, e.g. '13:00 UTC-6'.
+        Return the UTC instant as an ISO string (the frontend renders Sydney)."""
+        if not date or not time_str:
+            return None
+        mt = re.match(r"\s*(\d{1,2}):(\d{2})\s*UTC([+-]\d{1,2})(?::(\d{2}))?", time_str)
+        if not mt:
+            return None
+        hh, mm, oh, om = int(mt.group(1)), int(mt.group(2)), int(mt.group(3)), int(mt.group(4) or 0)
+        try:
+            local = datetime(int(date[:4]), int(date[5:7]), int(date[8:10]), hh, mm)
+        except ValueError:
+            return None
+        off = timedelta(hours=abs(oh), minutes=om)
+        if oh < 0:
+            off = -off
+        utc = (local - off).replace(tzinfo=timezone.utc)
+        return utc.isoformat().replace("+00:00", "Z")
+
     schedule = []
     counters = {}  # stage code -> running number
     group_no = 0
@@ -93,6 +114,7 @@ def build(data, of):
                 "stage": "group",
                 "group": grp.split()[1],
                 "date": m.get("date"),
+                "kickoff": kickoff_utc(m.get("date"), m.get("time")),
                 "t1": resolve(m["team1"]),
                 "t2": resolve(m["team2"]),
                 "ref1": None, "ref2": None,
@@ -110,6 +132,7 @@ def build(data, of):
                 "stage": code,
                 "group": None,
                 "date": m.get("date"),
+                "kickoff": kickoff_utc(m.get("date"), m.get("time")),
                 "t1": t1,
                 "t2": t2,
                 "ref1": None if t1 else m["team1"],

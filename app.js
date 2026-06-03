@@ -473,6 +473,19 @@ function fmtDate(d) {
   const dt = new Date(d + 'T00:00:00');
   return isNaN(dt) ? '' : dt.toLocaleDateString('en-AU', { day: 'numeric', month: 'short' });
 }
+// kickoff rendered in Sydney time for every viewer, wherever they are
+function fmtKick(m, withTime) {
+  const iso = m && m.kickoff;
+  if (iso) {
+    const dt = new Date(iso);
+    if (!isNaN(dt)) {
+      const opts = { timeZone: 'Australia/Sydney', weekday: 'short', day: 'numeric', month: 'short' };
+      if (withTime) Object.assign(opts, { hour: 'numeric', minute: '2-digit', hour12: true });
+      return dt.toLocaleString('en-AU', opts).replace(/,/g, '');
+    }
+  }
+  return fmtDate(m && m.date);
+}
 function prettyRef(r) {
   if (!r) return 'TBD';
   if (/^1[A-L]$/.test(r)) return 'Winner Grp ' + r[1];
@@ -544,8 +557,10 @@ function fixtureRowHTML(m) {
   const mid = m.status === 'finished'
     ? `<b>${m.s1}-${m.s2}</b>${pen(m)}`
     : `<span class="v">v</span>`;
-  return `<div class="fx"><span class="fxd">${fmtDate(m.date)}</span>
-    <span class="fa">${sideLabel(m, '1')}</span><span class="fm">${mid}</span><span class="fb">${sideLabel(m, '2')}</span></div>`;
+  return `<div class="fx">
+    <div class="fx-when">${fmtKick(m, true)}</div>
+    <div class="fx-row"><span class="fa">${sideLabel(m, '1')}</span><span class="fm">${mid}</span><span class="fb">${sideLabel(m, '2')}</span></div>
+  </div>`;
 }
 
 // ---- knockout bracket ----
@@ -596,7 +611,7 @@ function koMatchHTML(m, flat) {
   return `<div class="ko ${flat ? 'ko-flat' : ''}">
     ${koSideHTML(m, '1', w, champ)}
     ${koSideHTML(m, '2', w, champ)}
-    <span class="ko-num">M${m.num} · ${fmtDate(m.date)}</span>
+    <span class="ko-num">M${m.num} · ${fmtKick(m, true)}</span>
   </div>`;
 }
 function koSideHTML(m, s, w, champ) {
@@ -616,9 +631,11 @@ function koSideHTML(m, s, w, champ) {
 // ============================================================
 //  View routing
 // ============================================================
+const VIEW_KEY = 'wcs_view';
 function switchView(name) {
   $$('.view').forEach(v => v.classList.toggle('active', v.id === 'view-' + name));
   $$('nav.tabs button').forEach(b => b.classList.toggle('active', b.dataset.view === name));
+  try { localStorage.setItem(VIEW_KEY, name); } catch {}
 }
 function drawPhase() {
   if (DATA.draw.completed && DATA.draw.order.length) return 'done';
@@ -737,8 +754,11 @@ async function init() {
   await loadData();
   renderAll();
 
-  // tabs
+  // tabs — restore whichever tab was open before a refresh
   $$('nav.tabs button').forEach(b => b.addEventListener('click', () => switchView(b.dataset.view)));
+  let saved = 'draw';
+  try { saved = localStorage.getItem(VIEW_KEY) || 'draw'; } catch {}
+  if ($('#view-' + saved)) switchView(saved);
 
   // draw setup — two steps: draw the order, then draw the teams
   $('#addBoy').addEventListener('click', addBoy);
