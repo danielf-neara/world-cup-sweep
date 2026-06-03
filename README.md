@@ -24,7 +24,7 @@ No build step. Vanilla HTML/CSS/JS.
 
 ## How it works
 
-1. **The Draw** — add the boys, hit *Run the draw*. The order is shuffled and all 48 teams are dealt out with animation, then saved.
+1. **The Draw** — two steps: *Draw the order* shuffles the running order and locks it in, then *Draw the teams* deals the 48 teams out with animation. Every boy gets an equal share; any leftover teams go to **40th Trip** (the pot). Both steps save automatically.
 2. **Groups** — the 12 group tables, computed live from results, top two highlighted, plus fixtures. Each team is tagged with its owner.
 3. **Knockout** — the full bracket, Round of 32 → Final (+ third-place), teams filling in as groups finish.
 4. **Standings** — boys ranked by how many of their teams are still alive.

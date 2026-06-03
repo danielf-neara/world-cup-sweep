@@ -43,17 +43,32 @@
     <section class="view active" id="view-draw">
       <!-- setup (shown when no draw yet) -->
       <div class="panel" id="drawSetup">
-        <h2>Enter the boys</h2>
-        <p class="hint">Add everyone playing. When you hit the button, the draw order gets shuffled and all 48 teams are dealt out live.</p>
-        <div class="boys-list" id="boysList"></div>
-        <div class="row-actions">
-          <button class="btn btn-ghost" id="addBoy">+ Add a boy</button>
-          <span class="count-chip" id="splitChip"></span>
+        <!-- step 1: enter boys + draw the order -->
+        <div id="setupEntry">
+          <span class="step-tag">Draw 1 of 2</span>
+          <h2>Enter the boys</h2>
+          <p class="hint">Add everyone playing. First we shuffle the running order, then the teams get dealt out. Every boy gets the same number of teams; any leftovers go to <b>40th Trip</b>.</p>
+          <div class="boys-list" id="boysList"></div>
+          <div class="row-actions">
+            <button class="btn btn-ghost" id="addBoy">+ Add a boy</button>
+            <span class="count-chip" id="splitChip"></span>
+          </div>
+          <div style="margin-top:22px; display:flex; gap:12px; flex-wrap:wrap;">
+            <button class="btn btn-primary btn-lg" id="drawOrderBtn">🎲 Draw the order</button>
+          </div>
+          <p class="help" id="setupNote" style="margin-top:14px;"></p>
         </div>
-        <div style="margin-top:22px; display:flex; gap:12px; flex-wrap:wrap;">
-          <button class="btn btn-primary btn-lg" id="runDraw">🎲 Run the draw</button>
+        <!-- step 2: order locked, draw the teams -->
+        <div id="setupOrdered" style="display:none;">
+          <span class="step-tag">Draw 2 of 2</span>
+          <h2>Order locked in</h2>
+          <p class="hint" id="orderedHint">This is the running order. Now deal out the teams.</p>
+          <ol class="order-locked" id="orderLocked"></ol>
+          <div class="row-actions" style="margin-top:20px;">
+            <button class="btn btn-primary btn-lg" id="drawTeamsBtn">🎰 Draw the teams</button>
+            <button class="btn btn-ghost" id="editBoysBtn">← Edit boys / redraw order</button>
+          </div>
         </div>
-        <p class="help" id="setupNote" style="margin-top:14px;"></p>
       </div>
 
       <!-- results board (shown when draw done) -->

@@ -4,6 +4,7 @@
    ============================================================ */
 
 const CFG_KEY = 'wcs_config';
+const HOUSE = '40th Trip';   // leftover teams (the pot) go here
 const $  = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -136,12 +137,18 @@ function shuffle(a) {
 const teamById = id => DATA.teams.find(t => t.id === id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
 
-function splitText(nBoys) {
+function splitCounts(nBoys) {
   const T = DATA.teams.length;
+  const per = Math.floor(T / nBoys);
+  return { per, rem: T - per * nBoys, T };
+}
+function splitText(nBoys) {
   if (nBoys <= 0) return '';
-  const base = Math.floor(T / nBoys), rem = T % nBoys;
-  if (rem === 0) return `${nBoys} boys → <b>${base} teams each</b> (${T} total)`;
-  return `${nBoys} boys → <b>${rem} get ${base + 1}</b>, <b>${nBoys - rem} get ${base}</b> (${T} total)`;
+  const { per, rem, T } = splitCounts(nBoys);
+  const base = `${nBoys} boys → <b>${per} teams each</b>`;
+  return rem === 0
+    ? `${base} (${T} total, nothing spare)`
+    : `${base} · <b>40th Trip gets ${rem}</b> (${T} total)`;
 }
 
 // ============================================================
@@ -183,13 +190,14 @@ function updateSplitChip() {
   const note = $('#setupNote');
   if (dupes.size) note.innerHTML = `⚠ Duplicate name(s): ${[...dupes].join(', ')} — make them unique.`;
   else note.innerHTML = '';
-  $('#runDraw').disabled = n < 2 || dupes.size > 0;
+  $('#drawOrderBtn').disabled = n < 2 || dupes.size > 0;
 }
 
 // ============================================================
 //  THE DRAW (animated)
 // ============================================================
-async function runDraw() {
+// ---- Draw 1 of 2: the running order ----
+async function drawOrder() {
   const boys = cleanBoys();
   if (boys.length < 2) return;
   DATA.boys = boys;
@@ -199,33 +207,52 @@ async function runDraw() {
   stage.classList.add('show');
   const phase = $('#stagePhase'), onClock = $('#stageOnClock'), bodyEl = $('#stageBody');
 
-  // ---- phase 1: shuffle the order ----
   const order = shuffle(boys);
-  phase.textContent = 'Shuffling the draw order';
+  phase.textContent = 'Draw 1 of 2 · Shuffling the order';
   onClock.innerHTML = '';
   bodyEl.innerHTML = `<div class="order-reveal" id="orderReveal"></div>`;
   const orWrap = $('#orderReveal');
 
   if (!skipDraw) {
-    // teaser: flick through random orders
     for (let s = 0; s < 14 && !skipDraw; s++) {
       const r = shuffle(boys);
       orWrap.innerHTML = r.map((b, i) => `<div class="oi in" style="animation:none; opacity:1; transform:none;"><span class="pos">${i + 1}</span>${esc(b)}</div>`).join('');
       await sleep(70 + s * 14);
     }
   }
-  // settle to final order with stagger
   orWrap.innerHTML = order.map((b, i) =>
     `<div class="oi" style="animation-delay:${i * 90}ms"><span class="pos">${i + 1}</span>${esc(b)}</div>`).join('');
   $$('#orderReveal .oi').forEach(el => el.classList.add('in'));
-  await sleep(skipDraw ? 0 : order.length * 90 + 700);
+  await sleep(skipDraw ? 0 : order.length * 90 + 800);
 
-  // ---- phase 2: allocate teams (draft style) ----
+  // order locked, teams still to come
+  DATA.draw = { completed: false, order, allocations: {} };
+  DATA.champion = null;
+  DATA.teams.forEach(t => t.status = 'alive');
+
+  onClock.innerHTML = `Order locked! <em>Teams next…</em>`;
+  if (!skipDraw) await sleep(1100);
+
+  stage.classList.remove('show');
+  switchView('draw');
+  renderAll();
+  toast('Order drawn — saving…');
+  await pushData(true);
+  toast(canEdit() ? 'Order saved ✓ — now draw the teams' : 'Order set (local only)');
+}
+
+// ---- Draw 2 of 2: the team allocation ----
+async function drawTeams() {
+  const order = (DATA.draw && DATA.draw.order) || [];
+  if (order.length < 2) return;
+  skipDraw = false;
+
+  const stage = $('#stage');
+  stage.classList.add('show');
+  const phase = $('#stagePhase'), onClock = $('#stageOnClock'), bodyEl = $('#stageBody');
+
   const T = DATA.teams.length, n = order.length;
-  const base = Math.floor(T / n), rem = T % n;
-  const quota = {};
-  order.forEach((b, i) => { quota[b] = base + (i < rem ? 1 : 0); });
-
+  const per = Math.floor(T / n), rem = T - per * n;   // equal per boy, rest to 40th Trip
   const alloc = {}; order.forEach(b => alloc[b] = []);
   const pool = shuffle(DATA.teams.map(t => t.id));
 
@@ -238,32 +265,38 @@ async function runDraw() {
   const setSlot = t => { slotFlag.textContent = t.flag; slotName.textContent = t.name; };
 
   let pIdx = 0;
-  const maxRounds = base + (rem ? 1 : 0);
-  for (let round = 0; round < maxRounds; round++) {
-    for (let b = 0; b < n; b++) {
-      const boy = order[b];
-      if (alloc[boy].length >= quota[boy]) continue;
+  const spin = async (picked, who) => {
+    phase.textContent = `Draw 2 of 2 · Pick ${pIdx} of ${T}`;
+    onClock.innerHTML = `On the clock: <em>${esc(who)}</em>`;
+    if (skipDraw) return;
+    slot.classList.remove('locked');
+    for (let s = 0; s < 16 && !skipDraw; s++) {
+      setSlot(DATA.teams[Math.floor(Math.random() * T)]);
+      await sleep(38 + s * 9);
+    }
+    setSlot(picked);
+    slot.classList.add('locked');
+    await sleep(620);
+  };
+
+  // equal share to each boy, in the drawn order
+  for (let round = 0; round < per; round++) {
+    for (const boy of order) {
       const picked = teamById(pool[pIdx++]);
       alloc[boy].push(picked.id);
-
-      phase.textContent = `Pick ${pIdx} of ${T}`;
-      onClock.innerHTML = `On the clock: <em>${esc(boy)}</em>`;
-
-      if (!skipDraw) {
-        slot.classList.remove('locked');
-        const spins = 16;
-        for (let s = 0; s < spins && !skipDraw; s++) {
-          setSlot(DATA.teams[Math.floor(Math.random() * T)]);
-          await sleep(38 + s * 9);
-        }
-        setSlot(picked);
-        slot.classList.add('locked');
-        await sleep(620);
-      }
+      await spin(picked, boy);
+    }
+  }
+  // leftovers to 40th Trip
+  if (rem > 0) {
+    alloc[HOUSE] = [];
+    for (let k = 0; k < rem; k++) {
+      const picked = teamById(pool[pIdx++]);
+      alloc[HOUSE].push(picked.id);
+      await spin(picked, `${HOUSE} 🏖️`);
     }
   }
 
-  // ---- commit ----
   DATA.draw = { completed: true, order, allocations: alloc };
   DATA.champion = null;
   DATA.teams.forEach(t => t.status = 'alive');
@@ -288,11 +321,18 @@ function championOwner() {
   if (!DATA.champion) return null;
   return Object.keys(DATA.draw.allocations).find(b => DATA.draw.allocations[b].includes(DATA.champion)) || null;
 }
+// everyone holding teams: the boys in drawn order, then 40th Trip if it has any
+function participants() {
+  const list = (DATA.draw.order || []).slice();
+  if (((DATA.draw.allocations || {})[HOUSE] || []).length) list.push(HOUSE);
+  return list;
+}
 
 function boyCardHTML(boy, pos, opts = {}) {
   const ids = DATA.draw.allocations[boy] || [];
   const alive = aliveTeams(ids).length;
   const isWinner = championOwner() === boy;
+  const isHouse = boy === HOUSE;
   const teamsHTML = ids.map(id => {
     const t = teamById(id); if (!t) return '';
     const isChamp = DATA.champion === id;
@@ -303,13 +343,12 @@ function boyCardHTML(boy, pos, opts = {}) {
       ${isChamp ? '👑' : ''}
       <span class="grp">${t.group}</span></div>`;
   }).join('');
-  return `<div class="boy-card ${isWinner ? 'winner' : ''} ${alive === 0 && DATA.champion ? 'out' : ''}">
+  return `<div class="boy-card ${isWinner ? 'winner' : ''} ${isHouse ? 'house' : ''} ${alive === 0 && DATA.champion ? 'out' : ''}">
     <div class="bc-head">
-      <span class="bc-name">${esc(boy)}</span>
+      <span class="bc-name">${isHouse ? '🏖️ ' : ''}${esc(boy)}${isHouse ? '<span class="house-sub">the pot</span>' : ''}</span>
       ${isWinner ? '<span class="crown">👑</span>'
         : `<span class="alive-badge ${alive === 0 ? 'zero' : ''}">${alive} alive</span>`}
     </div>
-    ${pos != null ? '' : ''}
     ${teamsHTML}
   </div>`;
 }
@@ -322,8 +361,10 @@ function renderBoard() {
     $('#winnerBannerSlot').innerHTML = '';
     return;
   }
-  wrap.innerHTML = DATA.draw.order.map(b => boyCardHTML(b)).join('');
-  $('#boardSub').textContent = `${DATA.draw.order.length} boys · ${DATA.teams.length} teams · whoever owns the champion wins`;
+  wrap.innerHTML = participants().map(b => boyCardHTML(b)).join('');
+  const houseN = (DATA.draw.allocations[HOUSE] || []).length;
+  $('#boardSub').textContent =
+    `${DATA.draw.order.length} boys · ${DATA.teams.length} teams${houseN ? ` · ${houseN} to 40th Trip` : ''} · whoever owns the champion wins`;
   renderWinnerBanner('#winnerBannerSlot');
 }
 
@@ -334,7 +375,7 @@ function renderStandings() {
     $('#standingsWinnerSlot').innerHTML = '';
     return;
   }
-  const ranked = DATA.draw.order.slice().sort((a, b) =>
+  const ranked = participants().sort((a, b) =>
     aliveTeams(DATA.draw.allocations[b]).length - aliveTeams(DATA.draw.allocations[a]).length
   );
   wrap.innerHTML = ranked.map(b => boyCardHTML(b)).join('');
@@ -579,15 +620,33 @@ function switchView(name) {
   $$('.view').forEach(v => v.classList.toggle('active', v.id === 'view-' + name));
   $$('nav.tabs button').forEach(b => b.classList.toggle('active', b.dataset.view === name));
 }
+function drawPhase() {
+  if (DATA.draw.completed && DATA.draw.order.length) return 'done';
+  if ((DATA.draw.order || []).length) return 'ordered';   // order drawn, teams pending
+  return 'setup';
+}
 function renderDrawTab() {
-  const done = DATA.draw.completed && DATA.draw.order.length;
+  const phase = drawPhase();
   const admin = canEdit();
-  // Admin with no draw yet -> setup form. Everyone else -> the board
-  // (which shows a friendly "not done yet" message until the draw happens).
-  const showSetup = !done && admin;
+  // Admin drives the two-step setup; everyone else just sees the board
+  // (with a friendly "not done yet" message until the teams are drawn).
+  const showSetup = admin && phase !== 'done';
   $('#drawSetup').style.display   = showSetup ? 'block' : 'none';
   $('#drawResults').style.display = showSetup ? 'none' : 'block';
-  if (showSetup) renderBoysSetup(); else renderBoard();
+  if (!showSetup) { renderBoard(); return; }
+
+  const ordered = phase === 'ordered';
+  $('#setupEntry').style.display   = ordered ? 'none' : 'block';
+  $('#setupOrdered').style.display = ordered ? 'block' : 'none';
+  if (ordered) {
+    const { per, rem } = splitCounts(DATA.draw.order.length);
+    $('#orderedHint').innerHTML =
+      `This is the running order. Each boy gets <b>${per} teams</b>${rem ? ` and <b>40th Trip</b> gets the spare <b>${rem}</b>` : ''}. Now deal them out.`;
+    $('#orderLocked').innerHTML = DATA.draw.order
+      .map(b => `<li><span class="ol-pos"></span>${esc(b)}</li>`).join('');
+  } else {
+    renderBoysSetup();
+  }
 }
 
 function renderAll() {
@@ -681,9 +740,18 @@ async function init() {
   // tabs
   $$('nav.tabs button').forEach(b => b.addEventListener('click', () => switchView(b.dataset.view)));
 
-  // draw setup
+  // draw setup — two steps: draw the order, then draw the teams
   $('#addBoy').addEventListener('click', addBoy);
-  $('#runDraw').addEventListener('click', runDraw);
+  $('#drawOrderBtn').addEventListener('click', drawOrder);
+  $('#drawTeamsBtn').addEventListener('click', drawTeams);
+  $('#editBoysBtn').addEventListener('click', () => {
+    // back to the entry step, keeping the names so they can tweak and redraw the order
+    DATA.boys = DATA.draw.order.length ? DATA.draw.order.slice() : DATA.boys;
+    DATA.draw = { completed: false, order: [], allocations: {} };
+    DATA.champion = null;
+    DATA.teams.forEach(t => t.status = 'alive');
+    renderDrawTab();
+  });
   $('#redraw').addEventListener('click', () => {
     if (!confirm('Re-run the draw? This wipes the current allocations and any results.')) return;
     DATA.boys = DATA.draw.order.length ? DATA.draw.order.slice() : DATA.boys;
