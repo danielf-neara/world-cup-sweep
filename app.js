@@ -305,7 +305,7 @@ async function drawTeams() {
         <div class="pokie" id="pokie">
           <div class="pokie-crown">
             <div class="bulbs">${'<i></i>'.repeat(9)}</div>
-            <div class="jackpot">JACKPOT</div>
+            <div class="pokie-name">Everything But<br>the Gold</div>
             <div class="seven">7<span>7</span>7</div>
           </div>
           <div class="pokie-body">
