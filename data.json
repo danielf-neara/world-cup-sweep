@@ -2,7 +2,7 @@
   "meta": {
     "title": "World Cup '26 Sweep",
     "subtitle": "Everything But · Last Team Standing",
-    "lastUpdated": "2026-06-04T03:24:33.432Z",
+    "lastUpdated": "2026-06-04T03:34:05.539Z",
     "lastResultSync": "2026-06-03T05:47:55.918919+00:00"
   },
   "teams": [
@@ -392,115 +392,38 @@
     }
   ],
   "boys": [
-    "8",
-    "9",
-    "4",
-    "1",
-    "11",
-    "3",
-    "2",
-    "10",
-    "6",
-    "7",
-    "12",
-    "5",
-    "13"
+    "Flatty",
+    "Pon",
+    "Fiddy",
+    "Cheese",
+    "Fridge",
+    "Karoo",
+    "Sherm",
+    "Uzzi",
+    "Jj",
+    "Brune",
+    "Joess",
+    "Braas",
+    "Jabes"
   ],
   "draw": {
-    "completed": true,
+    "completed": false,
     "order": [
-      "5",
-      "2",
-      "8",
-      "6",
-      "13",
-      "4",
-      "9",
-      "11",
-      "3",
-      "10",
-      "12",
-      "7",
-      "1"
+      "Jj",
+      "Brune",
+      "Flatty",
+      "Cheese",
+      "Jabes",
+      "Braas",
+      "Sherm",
+      "Pon",
+      "Joess",
+      "Karoo",
+      "Uzzi",
+      "Fiddy",
+      "Fridge"
     ],
-    "allocations": {
-      "1": [
-        "col",
-        "irn",
-        "alg"
-      ],
-      "2": [
-        "arg",
-        "sco",
-        "ecu"
-      ],
-      "3": [
-        "ger",
-        "uru",
-        "usa"
-      ],
-      "4": [
-        "cro",
-        "par",
-        "jpn"
-      ],
-      "5": [
-        "esp",
-        "aut",
-        "sui"
-      ],
-      "6": [
-        "sen",
-        "egy",
-        "swe"
-      ],
-      "7": [
-        "fra",
-        "cze",
-        "pan"
-      ],
-      "8": [
-        "por",
-        "mex",
-        "rsa"
-      ],
-      "9": [
-        "eng",
-        "uzb",
-        "irq"
-      ],
-      "10": [
-        "bra",
-        "can",
-        "tur"
-      ],
-      "11": [
-        "mar",
-        "kor",
-        "aus"
-      ],
-      "12": [
-        "bel",
-        "tun",
-        "civ"
-      ],
-      "13": [
-        "ned",
-        "qat",
-        "nor"
-      ],
-      "40th Trip": [
-        "bih",
-        "cur",
-        "gha",
-        "ksa",
-        "jor",
-        "cpv",
-        "nzl",
-        "cod",
-        "hai"
-      ]
-    }
+    "allocations": {}
   },
   "champion": null,
   "schedule": [
