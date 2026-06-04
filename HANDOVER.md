@@ -45,10 +45,12 @@ Scoring is **last team standing**: whoever owns the eventual champion wins the p
   **"40th Trip"** (`HOUSE` constant) — the pot, shown as its own gold card.
   - 12 boys → 4 each, 40th Trip 0. 13 → 3 each, 40th Trip 9. 11 → 4 each, 40th Trip 4.
 - Re-running wipes allocations (guarded by confirm). "Edit boys / redraw order" goes back to entry.
-- **Two draw-2 toggles** (independent):
-  - `#seedToggle` (default on): each boy is dealt one of the **top-N seeded teams** first (random pairing), then the rest are random; off = fully random.
-  - `#houseLowToggle` (default off, only shown when 40th Trip gets teams): 40th Trip takes the **rem lowest FIFA-ranked teams**; off = random leftovers.
-  - Implemented in `drawTeams` via `topSeeds` / `houseTeams` / `restPool` partitions of `bySeed`.
+- **Draw style** (radio `input[name="drawMode"]`, default **pots**):
+  - **pots** — `per = floor(48/N)` pots of N by ranking; each boy gets one team per pot. Revealed **lowest pot first** so the **top N come out last**; a "Round X" banner (`showRoundBanner`, `#roundBanner`) sweeps between rounds. 40th Trip gets the rem lowest (drawn as Round 1). One slot machine reused per round.
+  - **seeds** — each boy dealt one of the top-N seeds first, then random.
+  - **random** — fully random.
+  - `#houseLowToggle` (shown only for seeds/random when rem>0, via `updateDrawModeUI()`): 40th Trip takes the rem lowest-ranked teams; off = random leftovers. In pots mode the dregs always go to 40th Trip.
+  - Allocation lives in `drawTeams`; pots branch builds `pots[]` + `dregs` from `bySeed`.
 - Seeds (1-48) come from the **official FIFA Men's World Ranking** (inside.fifa.com API). The seed order is baked into `SEED_ORDER` in `app.js` and applied on every load in `normalise()`, so seeds are reference data that can't be lost by a `data.json` merge or auto-update commit. To re-seed (e.g. updated rankings), edit `SEED_ORDER`. (Earlier bug: seeds lived only in `data.json` and got wiped by a merge, so "dregs" picked the last groups instead of the lowest-ranked — fixed by baking them into app.js.)
 
 ## Admin vs spectator

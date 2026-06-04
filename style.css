@@ -491,6 +491,33 @@ label.fld { display:block; font-size:12px; font-weight:800; letter-spacing:0.1em
 .seed-label b { display:block; font-size:14px; color: var(--text); }
 .seed-label em { display:block; font-style:normal; font-size:12px; color: var(--muted); margin-top:3px; line-height:1.45; }
 
+/* draw-style radio group */
+.draw-style { margin-top:16px; background: var(--surface); border:1px solid var(--line-soft); border-radius:12px; padding:14px 16px; }
+.ds-label { display:block; font-size:12px; font-weight:800; letter-spacing:0.1em; text-transform:uppercase; color: var(--muted); margin-bottom:8px; }
+.ds-opt { display:flex; gap:11px; align-items:flex-start; padding:10px 0; cursor:pointer; }
+.ds-opt + .ds-opt { border-top:1px solid rgba(255,255,255,0.05); }
+.ds-opt input { margin-top:2px; width:18px; height:18px; flex:none; accent-color: var(--lime); cursor:pointer; }
+.ds-text b { display:block; font-size:14px; color: var(--text); }
+.ds-text em { display:block; font-style:normal; font-size:12px; color: var(--muted); margin-top:2px; line-height:1.45; }
+.ds-opt input:checked ~ .ds-text b { color: var(--lime); }
+
+/* "Round X" banner sweep */
+.round-banner {
+  position:absolute; inset:0; z-index:10; pointer-events:none;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; text-align:center;
+  background: radial-gradient(circle at 50% 45%, rgba(8,24,15,0.82), rgba(3,8,5,0.95));
+  opacity:0; transform: scale(0.86); transition: opacity .4s ease, transform .4s cubic-bezier(.2,1.3,.4,1);
+}
+.round-banner.show { opacity:1; transform: scale(1); }
+.rb-num {
+  font-family: var(--display); text-transform:uppercase; line-height:0.9; letter-spacing:0.02em;
+  font-size: clamp(46px, 13vw, 120px); color: var(--lime); text-shadow: 0 0 36px rgba(198,255,61,0.55);
+}
+.rb-sub {
+  font-family: var(--body); font-weight:800; letter-spacing:0.16em; text-transform:uppercase;
+  color: var(--cyan); font-size: clamp(13px, 2.6vw, 19px);
+}
+
 /* ---------- 40th Trip (the pot) card ---------- */
 .boy-card.house { border-color: var(--gold); background: linear-gradient(180deg, rgba(255,206,58,0.10), var(--pitch-2)); }
 .boy-card.house .bc-name { color: var(--gold); }

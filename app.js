@@ -285,6 +285,18 @@ async function spinReel(reel, picked) {
   });
 }
 
+// big "Round X" sweep between pots
+async function showRoundBanner(big, sub) {
+  const b = $('#roundBanner'); if (!b) return;
+  $('#rbNum').textContent = big;
+  $('#rbSub').textContent = sub || '';
+  if (skipDraw) return;
+  b.classList.add('show');
+  await sleep(1700);
+  b.classList.remove('show');
+  await sleep(450);
+}
+
 async function drawTeams() {
   const order = (DATA.draw && DATA.draw.order) || [];
   if (order.length < 2) return;
@@ -299,22 +311,11 @@ async function drawTeams() {
   const per = Math.floor(T / n), rem = T - per * n;   // equal per boy, rest to 40th Trip
   const alloc = {}; order.forEach(b => alloc[b] = []);
 
-  // Two independent options, read from the Draw-2 toggles:
-  //  seedMode  - each boy is dealt one of the top-n seeded teams first (random pairing)
-  //  houseLow  - 40th Trip takes the rem lowest-ranked teams (rest still random)
-  const seedMode = $('#seedToggle') ? $('#seedToggle').checked : false;
-  const houseLow = rem > 0 && $('#houseLowToggle') ? $('#houseLowToggle').checked : false;
-
+  // Draw style: 'pots' = one team per ranking pot per boy, round by round;
+  // 'seeds' = one top seed each then random; 'random' = fully random.
+  const modeEl = document.querySelector('input[name="drawMode"]:checked');
+  const mode = modeEl ? modeEl.value : 'pots';
   const bySeed = DATA.teams.slice().sort((a, b) => (a.seed || 999) - (b.seed || 999)).map(t => t.id);
-  const topSeeds  = seedMode ? bySeed.slice(0, n) : [];
-  const houseTeams = houseLow ? bySeed.slice(48 - rem) : [];   // the rem lowest-ranked
-  const reserved = new Set([...topSeeds, ...houseTeams]);
-
-  const seedPool = shuffle(topSeeds);                           // random which boy gets which top seed
-  const housePool = shuffle(houseTeams);                        // shuffled for reveal order only
-  const restPool = shuffle(DATA.teams.map(t => t.id).filter(id => !reserved.has(id)));
-  let rIdx = 0, hIdx = 0;
-  const nextRest = () => restPool[rIdx++];
 
   const panel = [...order];
   if (rem > 0) panel.push(HOUSE);
@@ -381,19 +382,51 @@ async function drawTeams() {
     if (!skipDraw) await sleep(380);
   };
 
-  // equal share to each boy, in the drawn order.
-  // Round 0 is the seeded team (in seed mode); all other teams come from restPool.
-  for (let round = 0; round < per; round++) {
-    for (let i = 0; i < n; i++) {
-      const id = (seedMode && round === 0) ? seedPool[i] : nextRest();
-      await deal(order[i], i, id);
+  const houseIdx = panel.length - 1;
+
+  if (mode === 'pots') {
+    // pots of n by ranking; 40th Trip gets the rem lowest. Reveal lowest pot first.
+    const pots = [];
+    for (let k = 0; k < per; k++) pots.push(bySeed.slice(k * n, (k + 1) * n));
+    const dregs = bySeed.slice(per * n);                 // rem lowest -> 40th Trip
+    const total = per + (rem > 0 ? 1 : 0);
+    let round = 1;
+    if (rem > 0) {
+      alloc[HOUSE] = [];
+      await showRoundBanner(`Round ${round}`, `The dregs · ranks ${per * n + 1}–48 → 40th Trip`);
+      for (const id of shuffle(dregs)) await deal(HOUSE, houseIdx, id);
+      round++;
     }
-  }
-  // leftovers to 40th Trip (the lowest-ranked teams if houseLow, else random)
-  if (rem > 0) {
-    alloc[HOUSE] = [];
-    const houseIdx = panel.length - 1;
-    for (let k = 0; k < rem; k++) await deal(HOUSE, houseIdx, houseLow ? housePool[hIdx++] : nextRest());
+    for (let p = per - 1; p >= 0; p--) {                 // lowest pot first, top pot last
+      const lo = p * n + 1, hi = (p + 1) * n, final = p === 0;
+      await showRoundBanner(final ? 'Final Round' : `Round ${round}`,
+        final ? `🔥 The top ${n} 🔥` : `Pot · ranks ${lo}–${hi} · one each`);
+      const potTeams = shuffle(pots[p]);                 // random which boy gets which from the pot
+      for (let i = 0; i < n; i++) await deal(order[i], i, potTeams[i]);
+      round++;
+    }
+  } else {
+    // seeds / random (with optional 40th-Trip-takes-the-dregs)
+    const seedMode = mode === 'seeds';
+    const houseLow = rem > 0 && $('#houseLowToggle') && $('#houseLowToggle').checked;
+    const topSeeds  = seedMode ? bySeed.slice(0, n) : [];
+    const houseTeams = houseLow ? bySeed.slice(48 - rem) : [];
+    const reserved = new Set([...topSeeds, ...houseTeams]);
+    const seedPool = shuffle(topSeeds);
+    const housePool = shuffle(houseTeams);
+    const restPool = shuffle(DATA.teams.map(t => t.id).filter(id => !reserved.has(id)));
+    let rIdx = 0, hIdx = 0;
+    const nextRest = () => restPool[rIdx++];
+    for (let round = 0; round < per; round++) {
+      for (let i = 0; i < n; i++) {
+        const id = (seedMode && round === 0) ? seedPool[i] : nextRest();
+        await deal(order[i], i, id);
+      }
+    }
+    if (rem > 0) {
+      alloc[HOUSE] = [];
+      for (let k = 0; k < rem; k++) await deal(HOUSE, houseIdx, houseLow ? housePool[hIdx++] : nextRest());
+    }
   }
 
   DATA.draw = { completed: true, order, allocations: alloc };
@@ -864,18 +897,28 @@ function renderDrawTab() {
       `This is the running order. Each boy gets <b>${per} teams</b>${rem ? ` and <b>40th Trip</b> gets the spare <b>${rem}</b>` : ''}. Now deal them out.`;
     $('#orderLocked').innerHTML = DATA.draw.order
       .map(b => `<li><span class="ol-pos"></span>${esc(b)}</li>`).join('');
-    if ($('#seedToggleHint'))
-      $('#seedToggleHint').textContent =
-        `Each boy is dealt one of the top ${nB} seeded teams first (random which), then the rest are random.`;
-    if ($('#houseLowToggleWrap')) {
-      $('#houseLowToggleWrap').style.display = rem > 0 ? 'flex' : 'none';
-      if (rem > 0 && $('#houseLowToggleHint'))
-        $('#houseLowToggleHint').textContent =
-          `40th Trip gets the ${rem} lowest FIFA-ranked teams instead of random ones.`;
+    if ($('#potsHint')) {
+      const ranges = Array.from({ length: per }, (_, k) => `${k * nB + 1}-${(k + 1) * nB}`).join(', ');
+      $('#potsHint').textContent =
+        `${nB} boys → ${per} pots of ${nB} (ranks ${ranges})${rem ? `; 40th Trip gets the ${rem} lowest` : ''}. Lowest pot drawn first, top ${nB} last.`;
     }
+    if (rem > 0 && $('#houseLowToggleHint'))
+      $('#houseLowToggleHint').textContent =
+        `40th Trip gets the ${rem} lowest FIFA-ranked teams instead of random ones.`;
+    updateDrawModeUI();
   } else {
     renderBoysSetup();
   }
+}
+// show the dregs checkbox only for seeds/random modes (pots always sends dregs to 40th Trip)
+function updateDrawModeUI() {
+  const wrap = $('#houseLowToggleWrap'); if (!wrap) return;
+  const n = (DATA.draw.order || []).length;
+  const T = DATA.teams.length;
+  const rem = n >= 2 ? T - Math.floor(T / n) * n : 0;
+  const modeEl = document.querySelector('input[name="drawMode"]:checked');
+  const mode = modeEl ? modeEl.value : 'pots';
+  wrap.style.display = (mode !== 'pots' && rem > 0) ? 'flex' : 'none';
 }
 
 function renderAll() {
@@ -977,6 +1020,7 @@ async function init() {
   $('#addBoy').addEventListener('click', addBoy);
   $('#drawOrderBtn').addEventListener('click', drawOrder);
   $('#drawTeamsBtn').addEventListener('click', drawTeams);
+  $$('input[name="drawMode"]').forEach(r => r.addEventListener('change', updateDrawModeUI));
   $('#editBoysBtn').addEventListener('click', () => {
     // back to the entry step, keeping the names so they can tweak and redraw the order
     DATA.boys = DATA.draw.order.length ? DATA.draw.order.slice() : DATA.boys;
