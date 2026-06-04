@@ -255,13 +255,14 @@ async function drawOrder() {
 // ---- Draw 2 of 2: the team allocation (pokie machine) ----
 const reelCellHTML = t => `<div class="reel-cell"><span class="rc-flag">${t.flag}</span><span class="rc-name">${esc(t.name)}</span></div>`;
 
-async function spinReel(reel, picked) {
-  const T = DATA.teams.length;
+async function spinReel(reel, picked, pool) {
+  const cand = (pool && pool.length) ? pool : DATA.teams;   // only the teams in play this spin
   const K = 36;                                   // random cells before the winner (longer travel)
+  const rnd = () => cand[Math.floor(Math.random() * cand.length)];
   const strip = [];
-  for (let i = 0; i < K; i++) strip.push(DATA.teams[Math.floor(Math.random() * T)]);
+  for (let i = 0; i < K; i++) strip.push(rnd());
   strip.push(picked);                              // index K -> lands on the payline
-  strip.push(DATA.teams[Math.floor(Math.random() * T)]);  // one below, to centre it
+  strip.push(rnd());                               // one below, to centre it
   reel.innerHTML = strip.map(reelCellHTML).join('');
 
   const cellH = reel.firstElementChild.getBoundingClientRect().height || 92;
@@ -356,8 +357,9 @@ async function drawTeams() {
   const pokie = $('#pokie');
 
   let pCount = 0, spinTotal = T;
-  const deal = async (boy, rowIdx, teamId) => {
+  const deal = async (boy, rowIdx, teamId, poolIds) => {
     const picked = teamById(teamId);
+    const pool = (poolIds || []).map(teamById);     // teams still in play for this spin
     alloc[boy].push(picked.id);
     pCount++;
     prog.textContent = `Pick ${pCount} of ${spinTotal}`;
@@ -368,7 +370,7 @@ async function drawTeams() {
     if (!skipDraw) row.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
 
     if (!skipDraw) { pokie.classList.add('pull'); setTimeout(() => pokie.classList.remove('pull'), 600); }
-    await spinReel(reel, picked);
+    await spinReel(reel, picked, pool);
 
     reel.classList.add('hit');
     pokie.classList.add('win');
@@ -407,7 +409,8 @@ async function drawTeams() {
       await showRoundBanner(final ? 'Final Round' : `Round ${round}`,
         final ? `🔥 The top ${n} 🔥` : `Pot · ranks ${lo}–${hi} · one each`);
       const potTeams = shuffle(pots[p]);                 // random which boy gets which from the pot
-      for (let i = 0; i < n; i++) await deal(order[i], i, potTeams[i]);
+      // reel cycles only the teams still in play in this pot (potTeams[i..])
+      for (let i = 0; i < n; i++) await deal(order[i], i, potTeams[i], potTeams.slice(i));
       round++;
     }
   } else {
@@ -421,16 +424,22 @@ async function drawTeams() {
     const housePool = shuffle(houseTeams);
     const restPool = shuffle(DATA.teams.map(t => t.id).filter(id => !reserved.has(id)));
     let rIdx = 0, hIdx = 0;
-    const nextRest = () => restPool[rIdx++];
     for (let round = 0; round < per; round++) {
       for (let i = 0; i < n; i++) {
-        const id = (seedMode && round === 0) ? seedPool[i] : nextRest();
-        await deal(order[i], i, id);
+        if (seedMode && round === 0) {
+          await deal(order[i], i, seedPool[i], seedPool.slice(i));      // remaining top seeds
+        } else {
+          await deal(order[i], i, restPool[rIdx], restPool.slice(rIdx)); // remaining random teams
+          rIdx++;
+        }
       }
     }
     if (rem > 0) {
       alloc[HOUSE] = [];
-      for (let k = 0; k < rem; k++) await deal(HOUSE, houseIdx, houseLow ? housePool[hIdx++] : nextRest());
+      for (let k = 0; k < rem; k++) {
+        if (houseLow) { await deal(HOUSE, houseIdx, housePool[hIdx], housePool.slice(hIdx)); hIdx++; }
+        else { await deal(HOUSE, houseIdx, restPool[rIdx], restPool.slice(rIdx)); rIdx++; }
+      }
     }
   }
 
