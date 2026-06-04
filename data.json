@@ -2,7 +2,7 @@
   "meta": {
     "title": "World Cup '26 Sweep",
     "subtitle": "Everything But · Last Team Standing",
-    "lastUpdated": "2026-06-04T05:58:26.915Z",
+    "lastUpdated": "2026-06-04T05:58:48.959Z",
     "lastResultSync": "2026-06-03T05:47:55.918919+00:00"
   },
   "teams": [
@@ -392,117 +392,12 @@
     }
   ],
   "boys": [
-    "1",
-    "2",
-    "3",
-    "4",
-    "5",
-    "6",
-    "7",
-    "8",
-    "9",
-    "10",
-    "11",
-    "12",
-    "13"
+    ""
   ],
   "draw": {
-    "completed": true,
-    "order": [
-      "10",
-      "8",
-      "1",
-      "7",
-      "4",
-      "11",
-      "5",
-      "13",
-      "2",
-      "6",
-      "12",
-      "3",
-      "9"
-    ],
-    "allocations": {
-      "1": [
-        "jor",
-        "sui",
-        "por"
-      ],
-      "2": [
-        "ksa",
-        "usa",
-        "fra"
-      ],
-      "3": [
-        "irq",
-        "aus",
-        "bra"
-      ],
-      "4": [
-        "uzb",
-        "nor",
-        "esp"
-      ],
-      "5": [
-        "cze",
-        "kor",
-        "arg"
-      ],
-      "6": [
-        "qat",
-        "aut",
-        "col"
-      ],
-      "7": [
-        "cod",
-        "ecu",
-        "sen"
-      ],
-      "8": [
-        "egy",
-        "tur",
-        "bel"
-      ],
-      "9": [
-        "tun",
-        "jpn",
-        "ger"
-      ],
-      "10": [
-        "alg",
-        "uru",
-        "mex"
-      ],
-      "11": [
-        "rsa",
-        "irn",
-        "cro"
-      ],
-      "12": [
-        "par",
-        "pan",
-        "mar"
-      ],
-      "13": [
-        "sco",
-        "swe",
-        "eng"
-      ],
-      "40th Trip": [
-        "civ",
-        "can",
-        "ned"
-      ],
-      "Dregs": [
-        "cpv",
-        "bih",
-        "gha",
-        "nzl",
-        "cur",
-        "hai"
-      ]
-    }
+    "completed": false,
+    "order": [],
+    "allocations": {}
   },
   "champion": null,
   "schedule": [
