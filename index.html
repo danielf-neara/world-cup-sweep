@@ -72,6 +72,10 @@
               <span class="ds-text"><b>Pots by ranking</b><em id="potsHint">Each boy gets one team from each ranking pot, drawn lowest pot first so the top teams come out last.</em></span>
             </label>
             <label class="ds-opt">
+              <input type="radio" name="drawMode" value="potsplay" />
+              <span class="ds-text"><b>Pots — 40th Trip plays</b><em id="potsPlayHint">40th Trip joins as a player and draws one team per pot too; the lowest leftovers go to 40th Trip or a Dregs bucket.</em></span>
+            </label>
+            <label class="ds-opt">
               <input type="radio" name="drawMode" value="seeds" />
               <span class="ds-text"><b>Spread the top seeds</b><em>Each boy is dealt one of the top seeded teams first, then the rest are random.</em></span>
             </label>
@@ -86,6 +90,14 @@
             <span class="seed-label">
               <b>40th Trip takes the dregs</b>
               <em id="houseLowToggleHint">40th Trip gets the lowest FIFA-ranked teams instead of random ones.</em>
+            </span>
+          </label>
+          <label class="seed-toggle" id="dregsBucketWrap" style="display:none;">
+            <input type="checkbox" id="dregsBucketToggle" />
+            <span class="seed-switch"></span>
+            <span class="seed-label">
+              <b>Leftovers go to a "Dregs" bucket</b>
+              <em id="dregsBucketHint">The lowest teams go to a separate Dregs card owned by no one, instead of to 40th Trip.</em>
             </span>
           </label>
           <div class="row-actions" style="margin-top:18px;">

@@ -5,6 +5,7 @@
 
 const CFG_KEY = 'wcs_config';
 const HOUSE = '40th Trip';   // leftover teams (the pot) go here
+const DREGS = 'Dregs';       // optional unowned bucket (out of the sweep)
 
 // Seeding order by FIFA Men's World Ranking. Reference data baked in here and
 // applied on every load, so it can never be lost by a data.json merge or an
@@ -318,15 +319,25 @@ async function drawTeams() {
   const mode = modeEl ? modeEl.value : 'pots';
   const bySeed = DATA.teams.slice().sort((a, b) => (a.seed || 999) - (b.seed || 999)).map(t => t.id);
 
-  const panel = [...order];
-  if (rem > 0) panel.push(HOUSE);
+  // left-hand panel of rows depends on the mode
+  let panel;
+  if (mode === 'potsplay') {
+    const P = n + 1, remP = T - Math.floor(T / P) * P;
+    const toDregs = $('#dregsBucketToggle') && $('#dregsBucketToggle').checked;
+    panel = [...order, HOUSE];                          // 40th Trip plays as a participant
+    if (toDregs && remP > 0) panel.push(DREGS);         // separate unowned bucket card
+  } else {
+    panel = [...order];
+    if (rem > 0) panel.push(HOUSE);                     // pots/seeds/random: 40th Trip holds leftovers
+  }
+  const rowLabel = b => (b === HOUSE ? '🏖️ ' : b === DREGS ? '🗑️ ' : '') + esc(b);
 
   bodyEl.innerHTML = `
     <div class="draw2">
       <div class="d2-boys" id="d2Boys">
         ${panel.map((b, i) => `
-          <div class="d2-boy" data-idx="${i}">
-            <span class="d2-name">${b === HOUSE ? '🏖️ ' : ''}${esc(b)}</span>
+          <div class="d2-boy ${b === HOUSE ? 'is-house' : ''} ${b === DREGS ? 'is-dregs' : ''}" data-idx="${i}">
+            <span class="d2-name">${rowLabel(b)}</span>
             <div class="d2-teams"></div>
           </div>`).join('')}
       </div>
@@ -386,7 +397,40 @@ async function drawTeams() {
 
   const houseIdx = panel.length - 1;
 
-  if (mode === 'pots') {
+  const dropIn = (rowIdx, ids, alocKey) => {       // instant allocation, no slot spin
+    alloc[alocKey] = alloc[alocKey] || [];
+    const tdiv = rows[rowIdx].querySelector('.d2-teams');
+    for (const id of ids) {
+      alloc[alocKey].push(id);
+      const t = teamById(id);
+      tdiv.insertAdjacentHTML('beforeend', `<span class="d2-chip"><span class="fl">${t.flag}</span>${esc(t.name)}</span>`);
+    }
+  };
+
+  if (mode === 'potsplay') {
+    // 40th Trip plays as a participant; pots sized (boys + 1). Lowest leftovers
+    // go to 40th Trip or a separate Dregs bucket.
+    const P = n + 1;
+    const perP = Math.floor(T / P), remP = T - perP * P;
+    spinTotal = perP * P;
+    const pots = [];
+    for (let k = 0; k < perP; k++) pots.push(bySeed.slice(k * P, (k + 1) * P));
+    const leftovers = bySeed.slice(perP * P);          // remP lowest
+    const toDregs = $('#dregsBucketToggle') && $('#dregsBucketToggle').checked;
+    const drawers = [...order, HOUSE];                 // panel indices 0..P-1
+    drawers.forEach(d => alloc[d] = []);
+    if (remP > 0 && toDregs) dropIn(panel.indexOf(DREGS), leftovers, DREGS);   // pre-fill Dregs card
+    let round = 1;
+    for (let p = perP - 1; p >= 0; p--) {              // lowest pot first, top pot last
+      const lo = p * P + 1, hi = (p + 1) * P, final = p === 0;
+      await showRoundBanner(final ? 'Final Round' : `Round ${round}`,
+        final ? `🔥 The top ${P} 🔥` : `Pot · ranks ${lo}–${hi} · one each`);
+      const potTeams = shuffle(pots[p]);
+      for (let i = 0; i < P; i++) await deal(drawers[i], i, potTeams[i], potTeams.slice(i));
+      round++;
+    }
+    if (remP > 0 && !toDregs) dropIn(panel.indexOf(HOUSE), leftovers, HOUSE);  // leftovers onto 40th Trip
+  } else if (mode === 'pots') {
     // pots of n by ranking; 40th Trip gets the rem lowest. Reveal lowest pot first.
     const pots = [];
     for (let k = 0; k < per; k++) pots.push(bySeed.slice(k * n, (k + 1) * n));
@@ -466,12 +510,16 @@ async function drawTeams() {
 function aliveTeams(ids) { return ids.filter(id => teamById(id)?.status === 'alive'); }
 function championOwner() {
   if (!DATA.champion) return null;
-  return Object.keys(DATA.draw.allocations).find(b => DATA.draw.allocations[b].includes(DATA.champion)) || null;
+  // Dregs is an unowned bucket — it can't win the sweep
+  return Object.keys(DATA.draw.allocations).filter(b => b !== DREGS)
+    .find(b => DATA.draw.allocations[b].includes(DATA.champion)) || null;
 }
-// everyone holding teams: the boys in drawn order, then 40th Trip if it has any
+// everyone holding teams: boys in drawn order, then 40th Trip, then Dregs (if present)
 function participants() {
+  const a = DATA.draw.allocations || {};
   const list = (DATA.draw.order || []).slice();
-  if (((DATA.draw.allocations || {})[HOUSE] || []).length) list.push(HOUSE);
+  if ((a[HOUSE] || []).length) list.push(HOUSE);
+  if ((a[DREGS] || []).length) list.push(DREGS);
   return list;
 }
 
@@ -480,6 +528,7 @@ function boyCardHTML(boy, pos, opts = {}) {
   const alive = aliveTeams(ids).length;
   const isWinner = championOwner() === boy;
   const isHouse = boy === HOUSE;
+  const isDregs = boy === DREGS;
   const teamsHTML = ids.map(id => {
     const t = teamById(id); if (!t) return '';
     const isChamp = DATA.champion === id;
@@ -490,12 +539,12 @@ function boyCardHTML(boy, pos, opts = {}) {
       ${isChamp ? '👑' : ''}
       <span class="grp">${t.group}</span></div>`;
   }).join('');
-  return `<div class="boy-card ${isWinner ? 'winner' : ''} ${isHouse ? 'house' : ''} ${alive === 0 && DATA.champion ? 'out' : ''}">
-    <div class="bc-head">
-      <span class="bc-name">${isHouse ? '🏖️ ' : ''}${esc(boy)}${isHouse ? '<span class="house-sub">the pot</span>' : ''}</span>
-      ${isWinner ? '<span class="crown">👑</span>'
-        : `<span class="alive-badge ${alive === 0 ? 'zero' : ''}">${alive} alive</span>`}
-    </div>
+  const head = isDregs
+    ? `<span class="bc-name">🗑️ Dregs<span class="house-sub">out of the sweep</span></span>`
+    : `<span class="bc-name">${isHouse ? '🏖️ ' : ''}${esc(boy)}${isHouse ? '<span class="house-sub">the pot</span>' : ''}</span>
+       ${isWinner ? '<span class="crown">👑</span>' : `<span class="alive-badge ${alive === 0 ? 'zero' : ''}">${alive} alive</span>`}`;
+  return `<div class="boy-card ${isWinner ? 'winner' : ''} ${isHouse ? 'house' : ''} ${isDregs ? 'dregs' : ''} ${!isDregs && alive === 0 && DATA.champion ? 'out' : ''}">
+    <div class="bc-head">${head}</div>
     ${teamsHTML}
   </div>`;
 }
@@ -522,7 +571,7 @@ function renderStandings() {
     $('#standingsWinnerSlot').innerHTML = '';
     return;
   }
-  const ranked = participants().sort((a, b) =>
+  const ranked = participants().filter(b => b !== DREGS).sort((a, b) =>
     aliveTeams(DATA.draw.allocations[b]).length - aliveTeams(DATA.draw.allocations[a]).length
   );
   wrap.innerHTML = ranked.map(b => boyCardHTML(b)).join('');
@@ -919,20 +968,33 @@ function renderDrawTab() {
     if (rem > 0 && $('#houseLowToggleHint'))
       $('#houseLowToggleHint').textContent =
         `40th Trip gets the ${rem} lowest FIFA-ranked teams instead of random ones.`;
+    if ($('#potsPlayHint')) {
+      const P = nB + 1, perP = Math.floor(48 / P), remP = 48 - perP * P;
+      const ranges = Array.from({ length: perP }, (_, k) => `${k * P + 1}-${(k + 1) * P}`).join(', ');
+      $('#potsPlayHint').textContent =
+        `${nB} boys + 40th Trip = ${P} players → ${perP} pots of ${P} (ranks ${ranges})${remP ? `; ${remP} lowest spare` : ''}. Everyone draws one per pot.`;
+    }
+    if ($('#dregsBucketHint')) {
+      const remP = 48 - Math.floor(48 / (nB + 1)) * (nB + 1);
+      $('#dregsBucketHint').textContent =
+        `The ${remP} lowest go to a separate Dregs card (owned by no one) instead of to 40th Trip.`;
+    }
     updateDrawModeUI();
   } else {
     renderBoysSetup();
   }
 }
-// show the dregs checkbox only for seeds/random modes (pots always sends dregs to 40th Trip)
+// show the right sub-toggle for the selected mode
 function updateDrawModeUI() {
-  const wrap = $('#houseLowToggleWrap'); if (!wrap) return;
   const n = (DATA.draw.order || []).length;
   const T = DATA.teams.length;
-  const rem = n >= 2 ? T - Math.floor(T / n) * n : 0;
+  const rem  = n >= 2 ? T - Math.floor(T / n) * n : 0;            // boys-only modes
+  const remP = n >= 1 ? T - Math.floor(T / (n + 1)) * (n + 1) : 0; // 40th-Trip-plays mode
   const modeEl = document.querySelector('input[name="drawMode"]:checked');
   const mode = modeEl ? modeEl.value : 'pots';
-  wrap.style.display = (mode !== 'pots' && rem > 0) ? 'flex' : 'none';
+  const show = (id, on) => { const e = $('#' + id); if (e) e.style.display = on ? 'flex' : 'none'; };
+  show('houseLowToggleWrap', (mode === 'seeds' || mode === 'random') && rem > 0);
+  show('dregsBucketWrap', mode === 'potsplay' && remP > 0);
 }
 
 function updateLockUI() {

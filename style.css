@@ -532,6 +532,11 @@ label.fld { display:block; font-size:12px; font-weight:800; letter-spacing:0.1em
   display:block; font-family: var(--body); font-size:10px; font-weight:800;
   letter-spacing:0.14em; text-transform:uppercase; color: var(--dim); margin-top:2px;
 }
+/* Dregs bucket (unowned, out of the sweep) */
+.boy-card.dregs { border-color: var(--line-soft); background: var(--pitch-2); opacity:0.72; }
+.boy-card.dregs .bc-name { color: var(--muted); }
+.d2-boy.is-dregs { border-style:dashed; opacity:0.8; }
+.d2-boy.is-house { border-color: rgba(255,206,58,0.35); }
 
 /* ---------- Draw 2: the pokie ---------- */
 .draw2 { display:flex; gap:20px; width:min(980px, 94vw); height:min(72vh, 600px); }
