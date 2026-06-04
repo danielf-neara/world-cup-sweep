@@ -2,7 +2,7 @@
   "meta": {
     "title": "World Cup '26 Sweep",
     "subtitle": "Everything But · Last Team Standing",
-    "lastUpdated": "2026-06-04T03:08:12.977Z",
+    "lastUpdated": "2026-06-04T03:17:13.885Z",
     "lastResultSync": "2026-06-03T05:47:55.918919+00:00"
   },
   "teams": [
@@ -392,115 +392,38 @@
     }
   ],
   "boys": [
-    "8",
-    "5",
     "12",
-    "10",
-    "11",
+    "4",
+    "7",
+    "9",
+    "2",
+    "5",
+    "6",
     "3",
     "13",
-    "4",
-    "6",
-    "7",
-    "2",
+    "10",
     "1",
-    "9"
+    "11",
+    "8"
   ],
   "draw": {
-    "completed": true,
+    "completed": false,
     "order": [
-      "12",
-      "4",
-      "7",
+      "8",
       "9",
-      "2",
-      "5",
-      "6",
-      "3",
-      "13",
-      "10",
+      "4",
       "1",
       "11",
-      "8"
+      "3",
+      "2",
+      "10",
+      "6",
+      "7",
+      "12",
+      "5",
+      "13"
     ],
-    "allocations": {
-      "1": [
-        "cro",
-        "tur",
-        "uru"
-      ],
-      "2": [
-        "mex",
-        "aut",
-        "aus"
-      ],
-      "3": [
-        "ned",
-        "swe",
-        "tun"
-      ],
-      "4": [
-        "bra",
-        "qat",
-        "irq"
-      ],
-      "5": [
-        "arg",
-        "usa",
-        "sco"
-      ],
-      "6": [
-        "por",
-        "pan",
-        "cze"
-      ],
-      "7": [
-        "eng",
-        "ecu",
-        "alg"
-      ],
-      "8": [
-        "esp",
-        "civ",
-        "jpn"
-      ],
-      "9": [
-        "ger",
-        "uzb",
-        "irn"
-      ],
-      "10": [
-        "mar",
-        "sen",
-        "par"
-      ],
-      "11": [
-        "fra",
-        "nor",
-        "egy"
-      ],
-      "12": [
-        "col",
-        "rsa",
-        "sui"
-      ],
-      "13": [
-        "bel",
-        "can",
-        "kor"
-      ],
-      "40th Trip": [
-        "hai",
-        "cpv",
-        "cod",
-        "cur",
-        "gha",
-        "nzl",
-        "ksa",
-        "jor",
-        "bih"
-      ]
-    }
+    "allocations": {}
   },
   "champion": null,
   "schedule": [
