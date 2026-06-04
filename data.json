@@ -2,7 +2,7 @@
   "meta": {
     "title": "World Cup '26 Sweep",
     "subtitle": "Everything But · Last Team Standing",
-    "lastUpdated": "2026-06-04T04:32:12.476Z",
+    "lastUpdated": "2026-06-04T04:43:50.789Z",
     "lastResultSync": "2026-06-03T05:47:55.918919+00:00"
   },
   "teams": [
@@ -393,114 +393,37 @@
   ],
   "boys": [
     "Flatty",
-    "Brune",
-    "Fiddy",
-    "Pon",
-    "Braas",
-    "Jabes",
-    "Jooj",
-    "Joes",
-    "Karoo",
     "Fridge",
+    "Pon",
+    "Joess",
+    "Jooj",
+    "Fiddy",
     "Sherm",
-    "Cheese",
-    "Uzzi"
+    "Karoo",
+    "Uzzi",
+    "Jabes",
+    "Braas",
+    "Brune",
+    "Cheese"
   ],
   "draw": {
-    "completed": true,
+    "completed": false,
     "order": [
-      "Flatty",
-      "Fridge",
-      "Pon",
-      "Joes",
-      "Jooj",
-      "Fiddy",
       "Sherm",
-      "Karoo",
-      "Uzzi",
-      "Jabes",
-      "Braas",
+      "Flatty",
+      "Jooj",
       "Brune",
-      "Cheese"
+      "Fridge",
+      "Uzzi",
+      "Cheese",
+      "Fiddy",
+      "Karoo",
+      "Braas",
+      "Joess",
+      "Pon",
+      "Jabes"
     ],
-    "allocations": {
-      "Flatty": [
-        "sco",
-        "pan",
-        "arg"
-      ],
-      "Fridge": [
-        "uzb",
-        "usa",
-        "esp"
-      ],
-      "Pon": [
-        "irq",
-        "ecu",
-        "cro"
-      ],
-      "Joes": [
-        "qat",
-        "mex",
-        "col"
-      ],
-      "Jooj": [
-        "nor",
-        "tur",
-        "fra"
-      ],
-      "Fiddy": [
-        "par",
-        "jpn",
-        "ned"
-      ],
-      "Sherm": [
-        "tun",
-        "can",
-        "mar"
-      ],
-      "Karoo": [
-        "cze",
-        "sui",
-        "sen"
-      ],
-      "Uzzi": [
-        "swe",
-        "aut",
-        "bra"
-      ],
-      "Jabes": [
-        "alg",
-        "irn",
-        "bel"
-      ],
-      "Braas": [
-        "egy",
-        "uru",
-        "eng"
-      ],
-      "Brune": [
-        "rsa",
-        "aus",
-        "por"
-      ],
-      "Cheese": [
-        "civ",
-        "kor",
-        "ger"
-      ],
-      "40th Trip": [
-        "ksa",
-        "cod",
-        "jor",
-        "cpv",
-        "bih",
-        "gha",
-        "nzl",
-        "cur",
-        "hai"
-      ]
-    }
+    "allocations": {}
   },
   "champion": null,
   "schedule": [
