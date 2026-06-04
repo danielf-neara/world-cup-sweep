@@ -2,7 +2,7 @@
   "meta": {
     "title": "World Cup '26 Sweep",
     "subtitle": "Everything But · Last Team Standing",
-    "lastUpdated": "2026-06-04T04:43:50.789Z",
+    "lastUpdated": "2026-06-04T04:43:57.932Z",
     "lastResultSync": "2026-06-03T05:47:55.918919+00:00"
   },
   "teams": [
@@ -407,7 +407,7 @@
     "Cheese"
   ],
   "draw": {
-    "completed": false,
+    "completed": true,
     "order": [
       "Sherm",
       "Flatty",
@@ -423,7 +423,84 @@
       "Pon",
       "Jabes"
     ],
-    "allocations": {}
+    "allocations": {
+      "Sherm": [
+        "qat",
+        "kor",
+        "ger"
+      ],
+      "Flatty": [
+        "nor",
+        "sui",
+        "por"
+      ],
+      "Jooj": [
+        "uzb",
+        "pan",
+        "bel"
+      ],
+      "Brune": [
+        "rsa",
+        "ecu",
+        "sen"
+      ],
+      "Fridge": [
+        "swe",
+        "uru",
+        "bra"
+      ],
+      "Uzzi": [
+        "irq",
+        "aut",
+        "cro"
+      ],
+      "Cheese": [
+        "par",
+        "usa",
+        "fra"
+      ],
+      "Fiddy": [
+        "egy",
+        "irn",
+        "ned"
+      ],
+      "Karoo": [
+        "cze",
+        "mex",
+        "esp"
+      ],
+      "Braas": [
+        "alg",
+        "jpn",
+        "arg"
+      ],
+      "Joess": [
+        "sco",
+        "aus",
+        "mar"
+      ],
+      "Pon": [
+        "tun",
+        "can",
+        "eng"
+      ],
+      "Jabes": [
+        "civ",
+        "tur",
+        "col"
+      ],
+      "40th Trip": [
+        "ksa",
+        "cod",
+        "jor",
+        "cpv",
+        "bih",
+        "gha",
+        "nzl",
+        "cur",
+        "hai"
+      ]
+    }
   },
   "champion": null,
   "schedule": [
