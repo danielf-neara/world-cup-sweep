@@ -2,7 +2,7 @@
   "meta": {
     "title": "World Cup '26 Sweep",
     "subtitle": "Everything But · Last Team Standing",
-    "lastUpdated": "2026-06-04T02:55:56.359Z",
+    "lastUpdated": "2026-06-04T03:05:26.335Z",
     "lastResultSync": "2026-06-03T05:47:55.918919+00:00"
   },
   "teams": [
@@ -344,115 +344,12 @@
     }
   ],
   "boys": [
-    "13",
-    "9",
-    "10",
-    "1",
-    "3",
-    "11",
-    "2",
-    "7",
-    "12",
-    "4",
-    "8",
-    "6",
-    "5"
+    ""
   ],
   "draw": {
-    "completed": true,
-    "order": [
-      "13",
-      "8",
-      "2",
-      "9",
-      "4",
-      "10",
-      "6",
-      "7",
-      "5",
-      "1",
-      "12",
-      "11",
-      "3"
-    ],
-    "allocations": {
-      "1": [
-        "ger",
-        "swe",
-        "bra"
-      ],
-      "2": [
-        "alg",
-        "bih",
-        "hai"
-      ],
-      "3": [
-        "par",
-        "arg",
-        "mar"
-      ],
-      "4": [
-        "nzl",
-        "irq",
-        "irn"
-      ],
-      "5": [
-        "uru",
-        "qat",
-        "cpv"
-      ],
-      "6": [
-        "ecu",
-        "civ",
-        "cze"
-      ],
-      "7": [
-        "egy",
-        "kor",
-        "nor"
-      ],
-      "8": [
-        "sui",
-        "ned",
-        "sen"
-      ],
-      "9": [
-        "can",
-        "tun",
-        "jpn"
-      ],
-      "10": [
-        "aus",
-        "esp",
-        "mex"
-      ],
-      "11": [
-        "sco",
-        "bel",
-        "cur"
-      ],
-      "12": [
-        "usa",
-        "fra",
-        "ksa"
-      ],
-      "13": [
-        "aut",
-        "tur",
-        "rsa"
-      ],
-      "40th Trip": [
-        "gha",
-        "uzb",
-        "col",
-        "cod",
-        "cro",
-        "eng",
-        "jor",
-        "por",
-        "pan"
-      ]
-    }
+    "completed": false,
+    "order": [],
+    "allocations": {}
   },
   "champion": null,
   "schedule": [
