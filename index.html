@@ -65,7 +65,15 @@
           <h2>Order locked in</h2>
           <p class="hint" id="orderedHint">This is the running order. Now deal out the teams.</p>
           <ol class="order-locked" id="orderLocked"></ol>
-          <div class="row-actions" style="margin-top:20px;">
+          <label class="seed-toggle" id="seedToggleWrap">
+            <input type="checkbox" id="seedToggle" checked />
+            <span class="seed-switch"></span>
+            <span class="seed-label">
+              <b>Spread the top seeds evenly</b>
+              <em id="seedToggleHint">Each boy is dealt one of the top seeded teams first, then the rest are random.</em>
+            </span>
+          </label>
+          <div class="row-actions" style="margin-top:18px;">
             <button class="btn btn-primary btn-lg" id="drawTeamsBtn">🎰 Draw the teams</button>
             <button class="btn btn-ghost" id="editBoysBtn">← Edit boys / redraw order</button>
           </div>

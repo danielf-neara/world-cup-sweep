@@ -472,6 +472,24 @@ label.fld { display:block; font-size:12px; font-weight:800; letter-spacing:0.1em
   min-width:26px; text-align:center;
 }
 .ol-pos { display:none; }
+.seed-toggle {
+  display:flex; align-items:flex-start; gap:12px; margin-top:16px; cursor:pointer;
+  background: var(--surface); border:1px solid var(--line-soft); border-radius:12px; padding:14px 16px;
+}
+.seed-toggle input { position:absolute; opacity:0; width:0; height:0; }
+.seed-switch {
+  position:relative; flex:none; width:46px; height:26px; border-radius:100px; margin-top:1px;
+  background: var(--pitch); border:1px solid var(--line-soft); transition: background .2s, border-color .2s;
+}
+.seed-switch::after {
+  content:''; position:absolute; top:2px; left:2px; width:20px; height:20px; border-radius:50%;
+  background: var(--muted); transition: left .2s, background .2s;
+}
+.seed-toggle input:checked + .seed-switch { background: var(--lime); border-color: var(--lime); }
+.seed-toggle input:checked + .seed-switch::after { left:22px; background: var(--pitch); }
+.seed-toggle input:focus-visible + .seed-switch { box-shadow: 0 0 0 3px rgba(198,255,61,0.3); }
+.seed-label b { display:block; font-size:14px; color: var(--text); }
+.seed-label em { display:block; font-style:normal; font-size:12px; color: var(--muted); margin-top:3px; line-height:1.45; }
 
 /* ---------- 40th Trip (the pot) card ---------- */
 .boy-card.house { border-color: var(--gold); background: linear-gradient(180deg, rgba(255,206,58,0.10), var(--pitch-2)); }

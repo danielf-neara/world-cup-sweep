@@ -287,7 +287,23 @@ async function drawTeams() {
   const T = DATA.teams.length, n = order.length;
   const per = Math.floor(T / n), rem = T - per * n;   // equal per boy, rest to 40th Trip
   const alloc = {}; order.forEach(b => alloc[b] = []);
-  const pool = shuffle(DATA.teams.map(t => t.id));
+
+  // Seed mode: each boy gets one of the top-n seeded teams first (randomly),
+  // then the rest are filled from the remaining teams. Off = fully random.
+  const seedMode = $('#seedToggle') ? $('#seedToggle').checked : false;
+  let seedPool = [], restPool;
+  if (seedMode) {
+    const topSeeds = DATA.teams.slice()
+      .sort((a, b) => (a.seed || 999) - (b.seed || 999))
+      .slice(0, n).map(t => t.id);
+    const seedSet = new Set(topSeeds);
+    seedPool = shuffle(topSeeds);                                   // random which boy gets which seed
+    restPool = shuffle(DATA.teams.map(t => t.id).filter(id => !seedSet.has(id)));
+  } else {
+    restPool = shuffle(DATA.teams.map(t => t.id));
+  }
+  let rIdx = 0;
+  const nextRest = () => restPool[rIdx++];
 
   const panel = [...order];
   if (rem > 0) panel.push(HOUSE);
@@ -327,11 +343,12 @@ async function drawTeams() {
   const foot = $('#pokieFoot'), prog = $('#pokieProg');
   const pokie = $('#pokie');
 
-  let pIdx = 0;
-  const deal = async (boy, rowIdx) => {
-    const picked = teamById(pool[pIdx++]);
+  let pCount = 0;
+  const deal = async (boy, rowIdx, teamId) => {
+    const picked = teamById(teamId);
     alloc[boy].push(picked.id);
-    prog.textContent = `Pick ${pIdx} of ${T}`;
+    pCount++;
+    prog.textContent = `Pick ${pCount} of ${T}`;
     foot.innerHTML = `🎰 <b>${boy === HOUSE ? '40th Trip' : esc(boy)}</b> on the clock`;
     rows.forEach(r => r.classList.remove('on'));
     const row = rows[rowIdx];
@@ -353,15 +370,19 @@ async function drawTeams() {
     if (!skipDraw) await sleep(380);
   };
 
-  // equal share to each boy, in the drawn order
+  // equal share to each boy, in the drawn order.
+  // Round 0 is the seeded team (in seed mode); all other teams come from restPool.
   for (let round = 0; round < per; round++) {
-    for (let i = 0; i < n; i++) await deal(order[i], i);
+    for (let i = 0; i < n; i++) {
+      const id = (seedMode && round === 0) ? seedPool[i] : nextRest();
+      await deal(order[i], i, id);
+    }
   }
   // leftovers to 40th Trip
   if (rem > 0) {
     alloc[HOUSE] = [];
     const houseIdx = panel.length - 1;
-    for (let k = 0; k < rem; k++) await deal(HOUSE, houseIdx);
+    for (let k = 0; k < rem; k++) await deal(HOUSE, houseIdx, nextRest());
   }
 
   DATA.draw = { completed: true, order, allocations: alloc };
@@ -826,11 +847,15 @@ function renderDrawTab() {
   $('#setupEntry').style.display   = ordered ? 'none' : 'block';
   $('#setupOrdered').style.display = ordered ? 'block' : 'none';
   if (ordered) {
-    const { per, rem } = splitCounts(DATA.draw.order.length);
+    const nB = DATA.draw.order.length;
+    const { per, rem } = splitCounts(nB);
     $('#orderedHint').innerHTML =
       `This is the running order. Each boy gets <b>${per} teams</b>${rem ? ` and <b>40th Trip</b> gets the spare <b>${rem}</b>` : ''}. Now deal them out.`;
     $('#orderLocked').innerHTML = DATA.draw.order
       .map(b => `<li><span class="ol-pos"></span>${esc(b)}</li>`).join('');
+    if ($('#seedToggleHint'))
+      $('#seedToggleHint').textContent =
+        `Each boy is dealt one of the top ${nB} seeded teams first (random which), then the rest are random.`;
   } else {
     renderBoysSetup();
   }
