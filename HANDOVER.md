@@ -49,7 +49,7 @@ Scoring is **last team standing**: whoever owns the eventual champion wins the p
   - `#seedToggle` (default on): each boy is dealt one of the **top-N seeded teams** first (random pairing), then the rest are random; off = fully random.
   - `#houseLowToggle` (default off, only shown when 40th Trip gets teams): 40th Trip takes the **rem lowest FIFA-ranked teams**; off = random leftovers.
   - Implemented in `drawTeams` via `topSeeds` / `houseTeams` / `restPool` partitions of `bySeed`.
-- Seeds come from a `seed` field on each team in `data.json` (1-48), set by **FIFA World Ranking** for the top ~18 and FIFA ranking pots for the tail. The updater preserves the `seed` field.
+- Seeds (1-48) come from the **official FIFA Men's World Ranking** (inside.fifa.com API). The seed order is baked into `SEED_ORDER` in `app.js` and applied on every load in `normalise()`, so seeds are reference data that can't be lost by a `data.json` merge or auto-update commit. To re-seed (e.g. updated rankings), edit `SEED_ORDER`. (Earlier bug: seeds lived only in `data.json` and got wiped by a merge, so "dregs" picked the last groups instead of the lowest-ranked — fixed by baking them into app.js.)
 
 ## Admin vs spectator
 

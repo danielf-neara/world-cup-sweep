@@ -5,6 +5,12 @@
 
 const CFG_KEY = 'wcs_config';
 const HOUSE = '40th Trip';   // leftover teams (the pot) go here
+
+// Seeding order by official FIFA Men's World Ranking (inside.fifa.com).
+// Reference data baked in here and applied on every load, so it can never be
+// lost by a data.json merge or an auto-update commit. Index 0 = top seed.
+const SEED_ORDER = ['esp', 'fra', 'arg', 'eng', 'por', 'bra', 'ned', 'bel', 'cro', 'mar', 'ger', 'col', 'mex', 'uru', 'usa', 'sui', 'sen', 'jpn', 'irn', 'aut', 'kor', 'ecu', 'aus', 'can', 'tur', 'pan', 'nor', 'swe', 'egy', 'par', 'alg', 'cze', 'sco', 'civ', 'tun', 'qat', 'uzb', 'rsa', 'irq', 'ksa', 'cod', 'jor', 'cpv', 'bih', 'gha', 'nzl', 'cur', 'hai'];
+const SEED_INDEX = Object.fromEntries(SEED_ORDER.map((id, i) => [id, i + 1]));
 const $  = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -71,7 +77,10 @@ function normalise(d) {
   d = d || {};
   d.meta  = Object.assign({}, SEED.meta, d.meta);
   d.teams = Array.isArray(d.teams) ? d.teams : [];
-  d.teams.forEach(t => { if (t.status !== 'out') t.status = 'alive'; });
+  d.teams.forEach(t => {
+    if (t.status !== 'out') t.status = 'alive';
+    t.seed = SEED_INDEX[t.id] || 999;    // always apply FIFA seed (reference data)
+  });
   d.boys  = Array.isArray(d.boys) ? d.boys : [];
   d.draw  = Object.assign({ completed: false, order: [], allocations: {} }, d.draw);
   if (d.champion === undefined) d.champion = null;
