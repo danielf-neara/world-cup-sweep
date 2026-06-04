@@ -355,12 +355,12 @@ async function drawTeams() {
   const foot = $('#pokieFoot'), prog = $('#pokieProg');
   const pokie = $('#pokie');
 
-  let pCount = 0;
+  let pCount = 0, spinTotal = T;
   const deal = async (boy, rowIdx, teamId) => {
     const picked = teamById(teamId);
     alloc[boy].push(picked.id);
     pCount++;
-    prog.textContent = `Pick ${pCount} of ${T}`;
+    prog.textContent = `Pick ${pCount} of ${spinTotal}`;
     foot.innerHTML = `🎰 <b>${boy === HOUSE ? '40th Trip' : esc(boy)}</b> on the clock`;
     rows.forEach(r => r.classList.remove('on'));
     const row = rows[rowIdx];
@@ -388,16 +388,21 @@ async function drawTeams() {
     // pots of n by ranking; 40th Trip gets the rem lowest. Reveal lowest pot first.
     const pots = [];
     for (let k = 0; k < per; k++) pots.push(bySeed.slice(k * n, (k + 1) * n));
-    const dregs = bySeed.slice(per * n);                 // rem lowest -> 40th Trip
-    const total = per + (rem > 0 ? 1 : 0);
-    let round = 1;
+    spinTotal = per * n;                                 // only the boy pots get spun
+
+    // 40th Trip dregs: auto-allocated instantly (no slot machine)
     if (rem > 0) {
       alloc[HOUSE] = [];
-      await showRoundBanner(`Round ${round}`, `The dregs · ranks ${per * n + 1}–48 → 40th Trip`);
-      for (const id of shuffle(dregs)) await deal(HOUSE, houseIdx, id);
-      round++;
+      const tdiv = rows[houseIdx].querySelector('.d2-teams');
+      for (const id of bySeed.slice(per * n)) {
+        alloc[HOUSE].push(id);
+        const t = teamById(id);
+        tdiv.insertAdjacentHTML('beforeend', `<span class="d2-chip"><span class="fl">${t.flag}</span>${esc(t.name)}</span>`);
+      }
     }
-    for (let p = per - 1; p >= 0; p--) {                 // lowest pot first, top pot last
+    // boy pots, lowest first so the top n come out in the final round
+    let round = 1;
+    for (let p = per - 1; p >= 0; p--) {
       const lo = p * n + 1, hi = (p + 1) * n, final = p === 0;
       await showRoundBanner(final ? 'Final Round' : `Round ${round}`,
         final ? `🔥 The top ${n} 🔥` : `Pot · ranks ${lo}–${hi} · one each`);

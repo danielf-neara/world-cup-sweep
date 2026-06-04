@@ -46,7 +46,7 @@ Scoring is **last team standing**: whoever owns the eventual champion wins the p
   - 12 boys → 4 each, 40th Trip 0. 13 → 3 each, 40th Trip 9. 11 → 4 each, 40th Trip 4.
 - Re-running wipes allocations (guarded by confirm). "Edit boys / redraw order" goes back to entry.
 - **Draw style** (radio `input[name="drawMode"]`, default **pots**):
-  - **pots** — `per = floor(48/N)` pots of N by ranking; each boy gets one team per pot. Revealed **lowest pot first** so the **top N come out last**; a "Round X" banner (`showRoundBanner`, `#roundBanner`) sweeps between rounds. 40th Trip gets the rem lowest (drawn as Round 1). One slot machine reused per round.
+  - **pots** — `per = floor(48/N)` pots of N by ranking; each boy gets one team per pot. Revealed **lowest pot first** so the **top N come out last**; a "Round X" banner (`showRoundBanner`, `#roundBanner`) sweeps between rounds. 40th Trip's rem lowest are **auto-allocated instantly (no slot animation)** before the rounds. One slot machine reused per round.
   - **seeds** — each boy dealt one of the top-N seeds first, then random.
   - **random** — fully random.
   - `#houseLowToggle` (shown only for seeds/random when rem>0, via `updateDrawModeUI()`): 40th Trip takes the rem lowest-ranked teams; off = random leftovers. In pots mode the dregs always go to 40th Trip.
