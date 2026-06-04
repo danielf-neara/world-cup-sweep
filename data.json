@@ -2,7 +2,7 @@
   "meta": {
     "title": "World Cup '26 Sweep",
     "subtitle": "Everything But · Last Team Standing",
-    "lastUpdated": "2026-06-04T03:34:20.219Z",
+    "lastUpdated": "2026-06-04T03:34:55.928Z",
     "lastResultSync": "2026-06-03T05:47:55.918919+00:00"
   },
   "teams": [
@@ -392,115 +392,12 @@
     }
   ],
   "boys": [
-    "Flatty",
-    "Pon",
-    "Fiddy",
-    "Cheese",
-    "Fridge",
-    "Karoo",
-    "Sherm",
-    "Uzzi",
-    "Jj",
-    "Brune",
-    "Joess",
-    "Braas",
-    "Jabes"
+    ""
   ],
   "draw": {
-    "completed": true,
-    "order": [
-      "Jj",
-      "Brune",
-      "Flatty",
-      "Cheese",
-      "Jabes",
-      "Braas",
-      "Sherm",
-      "Pon",
-      "Joess",
-      "Karoo",
-      "Uzzi",
-      "Fiddy",
-      "Fridge"
-    ],
-    "allocations": {
-      "Jj": [
-        "col",
-        "cze",
-        "tun"
-      ],
-      "Brune": [
-        "esp",
-        "par",
-        "usa"
-      ],
-      "Flatty": [
-        "sen",
-        "sco",
-        "uzb"
-      ],
-      "Cheese": [
-        "arg",
-        "pan",
-        "aus"
-      ],
-      "Jabes": [
-        "ned",
-        "kor",
-        "civ"
-      ],
-      "Braas": [
-        "cro",
-        "irq",
-        "swe"
-      ],
-      "Sherm": [
-        "ger",
-        "qat",
-        "jpn"
-      ],
-      "Pon": [
-        "por",
-        "sui",
-        "irn"
-      ],
-      "Joess": [
-        "fra",
-        "aut",
-        "nor"
-      ],
-      "Karoo": [
-        "bel",
-        "can",
-        "alg"
-      ],
-      "Uzzi": [
-        "eng",
-        "mex",
-        "egy"
-      ],
-      "Fiddy": [
-        "bra",
-        "uru",
-        "ecu"
-      ],
-      "Fridge": [
-        "mar",
-        "tur",
-        "rsa"
-      ],
-      "40th Trip": [
-        "nzl",
-        "cur",
-        "gha",
-        "ksa",
-        "bih",
-        "jor",
-        "cod",
-        "hai",
-        "cpv"
-      ]
-    }
+    "completed": false,
+    "order": [],
+    "allocations": {}
   },
   "champion": null,
   "schedule": [
