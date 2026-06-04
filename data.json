@@ -2,7 +2,7 @@
   "meta": {
     "title": "World Cup '26 Sweep",
     "subtitle": "Everything But · Last Team Standing",
-    "lastUpdated": "2026-06-04T04:43:57.932Z",
+    "lastUpdated": "2026-06-04T05:19:04.510Z",
     "lastResultSync": "2026-06-03T05:47:55.918919+00:00"
   },
   "teams": [
@@ -392,115 +392,38 @@
     }
   ],
   "boys": [
-    "Flatty",
-    "Fridge",
-    "Pon",
-    "Joess",
-    "Jooj",
-    "Fiddy",
     "Sherm",
-    "Karoo",
-    "Uzzi",
-    "Jabes",
-    "Braas",
+    "Flatty",
+    "Jooj",
     "Brune",
-    "Cheese"
+    "Fridge",
+    "Uzzi",
+    "Cheese",
+    "Fiddy",
+    "Karoo",
+    "Braas",
+    "Joess",
+    "Pon",
+    "Jabes"
   ],
   "draw": {
-    "completed": true,
+    "completed": false,
     "order": [
-      "Sherm",
-      "Flatty",
-      "Jooj",
-      "Brune",
-      "Fridge",
-      "Uzzi",
-      "Cheese",
-      "Fiddy",
-      "Karoo",
       "Braas",
+      "Karoo",
+      "Jooj",
       "Joess",
+      "Uzzi",
+      "Fiddy",
+      "Fridge",
+      "Sherm",
+      "Brune",
+      "Jabes",
       "Pon",
-      "Jabes"
+      "Flatty",
+      "Cheese"
     ],
-    "allocations": {
-      "Sherm": [
-        "qat",
-        "kor",
-        "ger"
-      ],
-      "Flatty": [
-        "nor",
-        "sui",
-        "por"
-      ],
-      "Jooj": [
-        "uzb",
-        "pan",
-        "bel"
-      ],
-      "Brune": [
-        "rsa",
-        "ecu",
-        "sen"
-      ],
-      "Fridge": [
-        "swe",
-        "uru",
-        "bra"
-      ],
-      "Uzzi": [
-        "irq",
-        "aut",
-        "cro"
-      ],
-      "Cheese": [
-        "par",
-        "usa",
-        "fra"
-      ],
-      "Fiddy": [
-        "egy",
-        "irn",
-        "ned"
-      ],
-      "Karoo": [
-        "cze",
-        "mex",
-        "esp"
-      ],
-      "Braas": [
-        "alg",
-        "jpn",
-        "arg"
-      ],
-      "Joess": [
-        "sco",
-        "aus",
-        "mar"
-      ],
-      "Pon": [
-        "tun",
-        "can",
-        "eng"
-      ],
-      "Jabes": [
-        "civ",
-        "tur",
-        "col"
-      ],
-      "40th Trip": [
-        "ksa",
-        "cod",
-        "jor",
-        "cpv",
-        "bih",
-        "gha",
-        "nzl",
-        "cur",
-        "hai"
-      ]
-    }
+    "allocations": {}
   },
   "champion": null,
   "schedule": [
