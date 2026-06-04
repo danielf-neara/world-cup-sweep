@@ -6,10 +6,12 @@
 const CFG_KEY = 'wcs_config';
 const HOUSE = '40th Trip';   // leftover teams (the pot) go here
 
-// Seeding order by official FIFA Men's World Ranking (inside.fifa.com).
-// Reference data baked in here and applied on every load, so it can never be
-// lost by a data.json merge or an auto-update commit. Index 0 = top seed.
-const SEED_ORDER = ['esp', 'fra', 'arg', 'eng', 'por', 'bra', 'ned', 'bel', 'cro', 'mar', 'ger', 'col', 'mex', 'uru', 'usa', 'sui', 'sen', 'jpn', 'irn', 'aut', 'kor', 'ecu', 'aus', 'can', 'tur', 'pan', 'nor', 'swe', 'egy', 'par', 'alg', 'cze', 'sco', 'civ', 'tun', 'qat', 'uzb', 'rsa', 'irq', 'ksa', 'cod', 'jor', 'cpv', 'bih', 'gha', 'nzl', 'cur', 'hai'];
+// Seeding order by FIFA Men's World Ranking. Reference data baked in here and
+// applied on every load, so it can never be lost by a data.json merge or an
+// auto-update commit. Index 0 = top seed.
+// Top 18 = current FIFA ranking order among qualified teams (France #1,
+// Morocco #8, Senegal #13, Mexico #14, …); tail 19-48 by FIFA ranking.
+const SEED_ORDER = ['fra', 'esp', 'arg', 'eng', 'por', 'bra', 'ned', 'mar', 'bel', 'ger', 'cro', 'col', 'sen', 'mex', 'usa', 'uru', 'jpn', 'sui', 'irn', 'aut', 'kor', 'ecu', 'aus', 'can', 'tur', 'pan', 'nor', 'swe', 'egy', 'par', 'alg', 'cze', 'sco', 'civ', 'tun', 'qat', 'uzb', 'rsa', 'irq', 'ksa', 'cod', 'jor', 'cpv', 'bih', 'gha', 'nzl', 'cur', 'hai'];
 const SEED_INDEX = Object.fromEntries(SEED_ORDER.map((id, i) => [id, i + 1]));
 const $  = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
