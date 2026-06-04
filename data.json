@@ -2,7 +2,7 @@
   "meta": {
     "title": "World Cup '26 Sweep",
     "subtitle": "Everything But · Last Team Standing",
-    "lastUpdated": "2026-06-04T02:17:49.292Z",
+    "lastUpdated": "2026-06-04T02:42:40.419Z",
     "lastResultSync": "2026-06-03T05:47:55.918919+00:00"
   },
   "teams": [
@@ -11,384 +11,336 @@
       "name": "Mexico",
       "group": "A",
       "flag": "🇲🇽",
-      "status": "alive",
-      "seed": 14
+      "status": "alive"
     },
     {
       "id": "rsa",
       "name": "South Africa",
       "group": "A",
       "flag": "🇿🇦",
-      "status": "alive",
-      "seed": 36
+      "status": "alive"
     },
     {
       "id": "kor",
       "name": "South Korea",
       "group": "A",
       "flag": "🇰🇷",
-      "status": "alive",
-      "seed": 20
+      "status": "alive"
     },
     {
       "id": "cze",
       "name": "Czech Republic",
       "group": "A",
       "flag": "🇨🇿",
-      "status": "alive",
-      "seed": 43
+      "status": "alive"
     },
     {
       "id": "can",
       "name": "Canada",
       "group": "B",
       "flag": "🇨🇦",
-      "status": "alive",
-      "seed": 24
+      "status": "alive"
     },
     {
       "id": "bih",
       "name": "Bosnia and Herzegovina",
       "group": "B",
       "flag": "🇧🇦",
-      "status": "alive",
-      "seed": 44
+      "status": "alive"
     },
     {
       "id": "qat",
       "name": "Qatar",
       "group": "B",
       "flag": "🇶🇦",
-      "status": "alive",
-      "seed": 34
+      "status": "alive"
     },
     {
       "id": "sui",
       "name": "Switzerland",
       "group": "B",
       "flag": "🇨🇭",
-      "status": "alive",
-      "seed": 18
+      "status": "alive"
     },
     {
       "id": "bra",
       "name": "Brazil",
       "group": "C",
       "flag": "🇧🇷",
-      "status": "alive",
-      "seed": 6
+      "status": "alive"
     },
     {
       "id": "mar",
       "name": "Morocco",
       "group": "C",
       "flag": "🇲🇦",
-      "status": "alive",
-      "seed": 8
+      "status": "alive"
     },
     {
       "id": "hai",
       "name": "Haiti",
       "group": "C",
       "flag": "🇭🇹",
-      "status": "alive",
-      "seed": 41
+      "status": "alive"
     },
     {
       "id": "sco",
       "name": "Scotland",
       "group": "C",
       "flag": "🏴󠁧󠁢󠁳󠁣󠁴󠁿",
-      "status": "alive",
-      "seed": 29
+      "status": "alive"
     },
     {
       "id": "usa",
       "name": "United States",
       "group": "D",
       "flag": "🇺🇸",
-      "status": "alive",
-      "seed": 15
+      "status": "alive"
     },
     {
       "id": "par",
       "name": "Paraguay",
       "group": "D",
       "flag": "🇵🇾",
-      "status": "alive",
-      "seed": 30
+      "status": "alive"
     },
     {
       "id": "aus",
       "name": "Australia",
       "group": "D",
       "flag": "🇦🇺",
-      "status": "alive",
-      "seed": 23
+      "status": "alive"
     },
     {
       "id": "tur",
       "name": "Turkey",
       "group": "D",
       "flag": "🇹🇷",
-      "status": "alive",
-      "seed": 45
+      "status": "alive"
     },
     {
       "id": "ger",
       "name": "Germany",
       "group": "E",
       "flag": "🇩🇪",
-      "status": "alive",
-      "seed": 10
+      "status": "alive"
     },
     {
       "id": "cur",
       "name": "Curaçao",
       "group": "E",
       "flag": "🇨🇼",
-      "status": "alive",
-      "seed": 40
+      "status": "alive"
     },
     {
       "id": "civ",
       "name": "Ivory Coast",
       "group": "E",
       "flag": "🇨🇮",
-      "status": "alive",
-      "seed": 32
+      "status": "alive"
     },
     {
       "id": "ecu",
       "name": "Ecuador",
       "group": "E",
       "flag": "🇪🇨",
-      "status": "alive",
-      "seed": 21
+      "status": "alive"
     },
     {
       "id": "ned",
       "name": "Netherlands",
       "group": "F",
       "flag": "🇳🇱",
-      "status": "alive",
-      "seed": 7
+      "status": "alive"
     },
     {
       "id": "jpn",
       "name": "Japan",
       "group": "F",
       "flag": "🇯🇵",
-      "status": "alive",
-      "seed": 17
+      "status": "alive"
     },
     {
       "id": "swe",
       "name": "Sweden",
       "group": "F",
       "flag": "🇸🇪",
-      "status": "alive",
-      "seed": 46
+      "status": "alive"
     },
     {
       "id": "tun",
       "name": "Tunisia",
       "group": "F",
       "flag": "🇹🇳",
-      "status": "alive",
-      "seed": 31
+      "status": "alive"
     },
     {
       "id": "bel",
       "name": "Belgium",
       "group": "G",
       "flag": "🇧🇪",
-      "status": "alive",
-      "seed": 9
+      "status": "alive"
     },
     {
       "id": "egy",
       "name": "Egypt",
       "group": "G",
       "flag": "🇪🇬",
-      "status": "alive",
-      "seed": 27
+      "status": "alive"
     },
     {
       "id": "irn",
       "name": "Iran",
       "group": "G",
       "flag": "🇮🇷",
-      "status": "alive",
-      "seed": 19
+      "status": "alive"
     },
     {
       "id": "nzl",
       "name": "New Zealand",
       "group": "G",
       "flag": "🇳🇿",
-      "status": "alive",
-      "seed": 42
+      "status": "alive"
     },
     {
       "id": "esp",
       "name": "Spain",
       "group": "H",
       "flag": "🇪🇸",
-      "status": "alive",
-      "seed": 2
+      "status": "alive"
     },
     {
       "id": "cpv",
       "name": "Cape Verde",
       "group": "H",
       "flag": "🇨🇻",
-      "status": "alive",
-      "seed": 38
+      "status": "alive"
     },
     {
       "id": "ksa",
       "name": "Saudi Arabia",
       "group": "H",
       "flag": "🇸🇦",
-      "status": "alive",
-      "seed": 35
+      "status": "alive"
     },
     {
       "id": "uru",
       "name": "Uruguay",
       "group": "H",
       "flag": "🇺🇾",
-      "status": "alive",
-      "seed": 16
+      "status": "alive"
     },
     {
       "id": "fra",
       "name": "France",
       "group": "I",
       "flag": "🇫🇷",
-      "status": "alive",
-      "seed": 1
+      "status": "alive"
     },
     {
       "id": "sen",
       "name": "Senegal",
       "group": "I",
       "flag": "🇸🇳",
-      "status": "alive",
-      "seed": 13
+      "status": "alive"
     },
     {
       "id": "irq",
       "name": "Iraq",
       "group": "I",
       "flag": "🇮🇶",
-      "status": "alive",
-      "seed": 47
+      "status": "alive"
     },
     {
       "id": "nor",
       "name": "Norway",
       "group": "I",
       "flag": "🇳🇴",
-      "status": "alive",
-      "seed": 25
+      "status": "alive"
     },
     {
       "id": "arg",
       "name": "Argentina",
       "group": "J",
       "flag": "🇦🇷",
-      "status": "alive",
-      "seed": 3
+      "status": "alive"
     },
     {
       "id": "alg",
       "name": "Algeria",
       "group": "J",
       "flag": "🇩🇿",
-      "status": "alive",
-      "seed": 28
+      "status": "alive"
     },
     {
       "id": "aut",
       "name": "Austria",
       "group": "J",
       "flag": "🇦🇹",
-      "status": "alive",
-      "seed": 22
+      "status": "alive"
     },
     {
       "id": "jor",
       "name": "Jordan",
       "group": "J",
       "flag": "🇯🇴",
-      "status": "alive",
-      "seed": 37
+      "status": "alive"
     },
     {
       "id": "por",
       "name": "Portugal",
       "group": "K",
       "flag": "🇵🇹",
-      "status": "alive",
-      "seed": 5
+      "status": "alive"
     },
     {
       "id": "cod",
       "name": "DR Congo",
       "group": "K",
       "flag": "🇨🇩",
-      "status": "alive",
-      "seed": 48
+      "status": "alive"
     },
     {
       "id": "uzb",
       "name": "Uzbekistan",
       "group": "K",
       "flag": "🇺🇿",
-      "status": "alive",
-      "seed": 33
+      "status": "alive"
     },
     {
       "id": "col",
       "name": "Colombia",
       "group": "K",
       "flag": "🇨🇴",
-      "status": "alive",
-      "seed": 12
+      "status": "alive"
     },
     {
       "id": "eng",
       "name": "England",
       "group": "L",
       "flag": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
-      "status": "alive",
-      "seed": 4
+      "status": "alive"
     },
     {
       "id": "cro",
       "name": "Croatia",
       "group": "L",
       "flag": "🇭🇷",
-      "status": "alive",
-      "seed": 11
+      "status": "alive"
     },
     {
       "id": "gha",
       "name": "Ghana",
       "group": "L",
       "flag": "🇬🇭",
-      "status": "alive",
-      "seed": 39
+      "status": "alive"
     },
     {
       "id": "pan",
       "name": "Panama",
       "group": "L",
       "flag": "🇵🇦",
-      "status": "alive",
-      "seed": 26
+      "status": "alive"
     }
   ],
   "boys": [
@@ -396,111 +348,18 @@
     "2",
     "3",
     "4",
-    "5",
-    "6",
-    "7",
-    "8",
-    "9",
-    "10",
-    "11",
-    "12",
-    "13"
+    "5"
   ],
   "draw": {
-    "completed": true,
+    "completed": false,
     "order": [
-      "5",
-      "7",
-      "9",
       "4",
-      "8",
-      "10",
-      "11",
-      "3",
       "2",
-      "12",
       "1",
-      "13",
-      "6"
+      "5",
+      "3"
     ],
-    "allocations": {
-      "1": [
-        "mar",
-        "ger",
-        "sco"
-      ],
-      "2": [
-        "bel",
-        "gha",
-        "kor"
-      ],
-      "3": [
-        "cro",
-        "tun",
-        "cur"
-      ],
-      "4": [
-        "usa",
-        "jor",
-        "jpn"
-      ],
-      "5": [
-        "cpv",
-        "col",
-        "irq"
-      ],
-      "6": [
-        "sui",
-        "irn",
-        "bih"
-      ],
-      "7": [
-        "cod",
-        "rsa",
-        "ned"
-      ],
-      "8": [
-        "pan",
-        "uzb",
-        "ecu"
-      ],
-      "9": [
-        "aus",
-        "cze",
-        "par"
-      ],
-      "10": [
-        "mex",
-        "nzl",
-        "bra"
-      ],
-      "11": [
-        "alg",
-        "tur",
-        "esp"
-      ],
-      "12": [
-        "fra",
-        "can",
-        "arg"
-      ],
-      "13": [
-        "egy",
-        "aut",
-        "hai"
-      ],
-      "40th Trip": [
-        "qat",
-        "civ",
-        "eng",
-        "nor",
-        "sen",
-        "uru",
-        "swe",
-        "ksa",
-        "por"
-      ]
-    }
+    "allocations": {}
   },
   "champion": null,
   "schedule": [
