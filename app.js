@@ -288,21 +288,21 @@ async function drawTeams() {
   const per = Math.floor(T / n), rem = T - per * n;   // equal per boy, rest to 40th Trip
   const alloc = {}; order.forEach(b => alloc[b] = []);
 
-  // Seed mode: each boy gets one of the top-n seeded teams first (randomly),
-  // then the rest are filled from the remaining teams. Off = fully random.
+  // Two independent options, read from the Draw-2 toggles:
+  //  seedMode  - each boy is dealt one of the top-n seeded teams first (random pairing)
+  //  houseLow  - 40th Trip takes the rem lowest-ranked teams (rest still random)
   const seedMode = $('#seedToggle') ? $('#seedToggle').checked : false;
-  let seedPool = [], restPool;
-  if (seedMode) {
-    const topSeeds = DATA.teams.slice()
-      .sort((a, b) => (a.seed || 999) - (b.seed || 999))
-      .slice(0, n).map(t => t.id);
-    const seedSet = new Set(topSeeds);
-    seedPool = shuffle(topSeeds);                                   // random which boy gets which seed
-    restPool = shuffle(DATA.teams.map(t => t.id).filter(id => !seedSet.has(id)));
-  } else {
-    restPool = shuffle(DATA.teams.map(t => t.id));
-  }
-  let rIdx = 0;
+  const houseLow = rem > 0 && $('#houseLowToggle') ? $('#houseLowToggle').checked : false;
+
+  const bySeed = DATA.teams.slice().sort((a, b) => (a.seed || 999) - (b.seed || 999)).map(t => t.id);
+  const topSeeds  = seedMode ? bySeed.slice(0, n) : [];
+  const houseTeams = houseLow ? bySeed.slice(48 - rem) : [];   // the rem lowest-ranked
+  const reserved = new Set([...topSeeds, ...houseTeams]);
+
+  const seedPool = shuffle(topSeeds);                           // random which boy gets which top seed
+  const housePool = shuffle(houseTeams);                        // shuffled for reveal order only
+  const restPool = shuffle(DATA.teams.map(t => t.id).filter(id => !reserved.has(id)));
+  let rIdx = 0, hIdx = 0;
   const nextRest = () => restPool[rIdx++];
 
   const panel = [...order];
@@ -378,11 +378,11 @@ async function drawTeams() {
       await deal(order[i], i, id);
     }
   }
-  // leftovers to 40th Trip
+  // leftovers to 40th Trip (the lowest-ranked teams if houseLow, else random)
   if (rem > 0) {
     alloc[HOUSE] = [];
     const houseIdx = panel.length - 1;
-    for (let k = 0; k < rem; k++) await deal(HOUSE, houseIdx, nextRest());
+    for (let k = 0; k < rem; k++) await deal(HOUSE, houseIdx, houseLow ? housePool[hIdx++] : nextRest());
   }
 
   DATA.draw = { completed: true, order, allocations: alloc };
@@ -856,6 +856,12 @@ function renderDrawTab() {
     if ($('#seedToggleHint'))
       $('#seedToggleHint').textContent =
         `Each boy is dealt one of the top ${nB} seeded teams first (random which), then the rest are random.`;
+    if ($('#houseLowToggleWrap')) {
+      $('#houseLowToggleWrap').style.display = rem > 0 ? 'flex' : 'none';
+      if (rem > 0 && $('#houseLowToggleHint'))
+        $('#houseLowToggleHint').textContent =
+          `40th Trip gets the ${rem} lowest FIFA-ranked teams instead of random ones.`;
+    }
   } else {
     renderBoysSetup();
   }

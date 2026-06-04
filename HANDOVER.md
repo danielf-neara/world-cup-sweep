@@ -45,7 +45,11 @@ Scoring is **last team standing**: whoever owns the eventual champion wins the p
   **"40th Trip"** (`HOUSE` constant) — the pot, shown as its own gold card.
   - 12 boys → 4 each, 40th Trip 0. 13 → 3 each, 40th Trip 9. 11 → 4 each, 40th Trip 4.
 - Re-running wipes allocations (guarded by confirm). "Edit boys / redraw order" goes back to entry.
-- **Seed toggle** (`#seedToggle`, default on, in the Draw-2 step): when on, each boy is dealt one of the **top-N seeded teams** first (random which boy gets which), then the rest are random; off = fully random. Seeds come from a `seed` field on each team in `data.json` (1-48), set by **FIFA World Ranking** for the top ~18 and FIFA ranking pots for the tail. To re-seed, edit the order list in the seed-assignment step or `data.json` directly; the updater preserves the `seed` field.
+- **Two draw-2 toggles** (independent):
+  - `#seedToggle` (default on): each boy is dealt one of the **top-N seeded teams** first (random pairing), then the rest are random; off = fully random.
+  - `#houseLowToggle` (default off, only shown when 40th Trip gets teams): 40th Trip takes the **rem lowest FIFA-ranked teams**; off = random leftovers.
+  - Implemented in `drawTeams` via `topSeeds` / `houseTeams` / `restPool` partitions of `bySeed`.
+- Seeds come from a `seed` field on each team in `data.json` (1-48), set by **FIFA World Ranking** for the top ~18 and FIFA ranking pots for the tail. The updater preserves the `seed` field.
 
 ## Admin vs spectator
 
