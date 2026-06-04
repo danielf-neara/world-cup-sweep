@@ -2,7 +2,7 @@
   "meta": {
     "title": "World Cup '26 Sweep",
     "subtitle": "Everything But · Last Team Standing",
-    "lastUpdated": "2026-06-04T03:24:05.894Z",
+    "lastUpdated": "2026-06-04T03:24:33.432Z",
     "lastResultSync": "2026-06-03T05:47:55.918919+00:00"
   },
   "teams": [
@@ -407,7 +407,7 @@
     "13"
   ],
   "draw": {
-    "completed": false,
+    "completed": true,
     "order": [
       "5",
       "2",
@@ -423,7 +423,84 @@
       "7",
       "1"
     ],
-    "allocations": {}
+    "allocations": {
+      "1": [
+        "col",
+        "irn",
+        "alg"
+      ],
+      "2": [
+        "arg",
+        "sco",
+        "ecu"
+      ],
+      "3": [
+        "ger",
+        "uru",
+        "usa"
+      ],
+      "4": [
+        "cro",
+        "par",
+        "jpn"
+      ],
+      "5": [
+        "esp",
+        "aut",
+        "sui"
+      ],
+      "6": [
+        "sen",
+        "egy",
+        "swe"
+      ],
+      "7": [
+        "fra",
+        "cze",
+        "pan"
+      ],
+      "8": [
+        "por",
+        "mex",
+        "rsa"
+      ],
+      "9": [
+        "eng",
+        "uzb",
+        "irq"
+      ],
+      "10": [
+        "bra",
+        "can",
+        "tur"
+      ],
+      "11": [
+        "mar",
+        "kor",
+        "aus"
+      ],
+      "12": [
+        "bel",
+        "tun",
+        "civ"
+      ],
+      "13": [
+        "ned",
+        "qat",
+        "nor"
+      ],
+      "40th Trip": [
+        "bih",
+        "cur",
+        "gha",
+        "ksa",
+        "jor",
+        "cpv",
+        "nzl",
+        "cod",
+        "hai"
+      ]
+    }
   },
   "champion": null,
   "schedule": [
