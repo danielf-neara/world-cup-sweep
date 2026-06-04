@@ -45,6 +45,7 @@ Scoring is **last team standing**: whoever owns the eventual champion wins the p
   **"40th Trip"** (`HOUSE` constant) — the pot, shown as its own gold card.
   - 12 boys → 4 each, 40th Trip 0. 13 → 3 each, 40th Trip 9. 11 → 4 each, 40th Trip 4.
 - Re-running wipes allocations (guarded by confirm). "Edit boys / redraw order" goes back to entry.
+- **Lock draw**: `DATA.draw.locked` (persisted, survives reload + auto-update bot). "Lock the draw" button on the results board; when locked, a 🔒 badge shows, Re-run is hidden, and Re-run/Reset/Wipe are all blocked. Unlocking takes **two confirmations** (`#unlockDraw`). UI driven by `updateLockUI()`.
 - **Draw style** (radio `input[name="drawMode"]`, default **pots**):
   - **pots** — `per = floor(48/N)` pots of N by ranking; each boy gets one team per pot. Revealed **lowest pot first** so the **top N come out last**; a "Round X" banner (`showRoundBanner`, `#roundBanner`) sweeps between rounds. 40th Trip's rem lowest are **auto-allocated instantly (no slot animation)** before the rounds. One slot machine reused per round.
   - **seeds** — each boy dealt one of the top-N seeds first, then random.

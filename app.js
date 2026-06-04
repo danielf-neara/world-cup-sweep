@@ -84,7 +84,7 @@ function normalise(d) {
     t.seed = SEED_INDEX[t.id] || 999;    // always apply FIFA seed (reference data)
   });
   d.boys  = Array.isArray(d.boys) ? d.boys : [];
-  d.draw  = Object.assign({ completed: false, order: [], allocations: {} }, d.draw);
+  d.draw  = Object.assign({ completed: false, order: [], allocations: {}, locked: false }, d.draw);
   if (d.champion === undefined) d.champion = null;
   return d;
 }
@@ -935,10 +935,21 @@ function updateDrawModeUI() {
   wrap.style.display = (mode !== 'pots' && rem > 0) ? 'flex' : 'none';
 }
 
+function updateLockUI() {
+  const done = !!(DATA.draw.completed && DATA.draw.order.length);
+  const locked = done && !!DATA.draw.locked;
+  const set = (id, show) => { const e = $('#' + id); if (e) e.style.display = show ? '' : 'none'; };
+  set('lockBadge', locked);
+  set('lockDraw', done && !locked);
+  set('unlockDraw', locked);
+  set('redraw', done && !locked);   // hide re-run while locked
+}
+
 function renderAll() {
   document.body.classList.toggle('spectator', !canEdit());
   $('#subtitle').textContent = DATA.meta.subtitle || '';
   renderDrawTab();
+  updateLockUI();
   renderMatchCentre();
   renderGroups();
   renderKnockout();
@@ -1044,6 +1055,7 @@ async function init() {
     renderDrawTab();
   });
   $('#redraw').addEventListener('click', () => {
+    if (DATA.draw.locked) { toast('Draw is locked 🔒 — unlock it first', true); return; }
     if (!confirm('Re-run the draw? This wipes the current allocations and any results.')) return;
     DATA.boys = DATA.draw.order.length ? DATA.draw.order.slice() : DATA.boys;
     DATA.draw = { completed: false, order: [], allocations: {} };
@@ -1051,6 +1063,18 @@ async function init() {
     DATA.teams.forEach(t => t.status = 'alive');
     renderDrawTab();
     switchView('draw');
+  });
+  $('#lockDraw').addEventListener('click', async () => {
+    if (!(DATA.draw.completed && DATA.draw.order.length)) return;
+    if (!confirm('Lock the draw? It will be protected from re-running, resetting or wiping until you unlock it.')) return;
+    DATA.draw.locked = true;
+    renderAll(); await pushData(true); toast('Draw locked 🔒');
+  });
+  $('#unlockDraw').addEventListener('click', async () => {
+    if (!confirm('Unlock the official draw? This removes the protection so it can be changed or deleted.')) return;
+    if (!confirm('Are you sure? Only unlock if you really mean to change the official draw.')) return;
+    DATA.draw.locked = false;
+    renderAll(); await pushData(true); toast('Draw unlocked 🔓');
   });
   $('#stageSkip').addEventListener('click', () => { skipDraw = true; });
 
@@ -1079,6 +1103,7 @@ async function init() {
 
   // danger
   $('#resetDraw').addEventListener('click', async () => {
+    if (DATA.draw.locked) { toast('Draw is locked 🔒 — unlock it first (Draw tab)', true); return; }
     if (!confirm('Reset the draw? Keeps the boys and teams, clears allocations and results.')) return;
     DATA.draw = { completed: false, order: [], allocations: {} };
     DATA.champion = null;
@@ -1086,6 +1111,7 @@ async function init() {
     renderAll(); switchView('draw'); await pushData(true); toast('Draw reset');
   });
   $('#resetAll').addEventListener('click', async () => {
+    if (DATA.draw.locked) { toast('Draw is locked 🔒 — unlock it first (Draw tab)', true); return; }
     if (!confirm('Wipe everything back to a fresh tournament (teams stay, all teams alive, boys cleared)?')) return;
     DATA.boys = []; DATA.draw = { completed: false, order: [], allocations: {} };
     DATA.champion = null; DATA.teams.forEach(t => t.status = 'alive');
