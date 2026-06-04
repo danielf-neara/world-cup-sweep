@@ -34,7 +34,7 @@ let skipDraw = false;
 //  Config (GitHub sync)
 // ============================================================
 // This site's own repo — pre-filled so the admin only has to paste a token.
-const DEFAULT_REPO = { owner: 'danielf-neara', repo: 'world-cup-sweep', branch: 'main', path: 'data.json' };
+const DEFAULT_REPO = { owner: 'f1atty', repo: 'world-cup-sweep', branch: 'main', path: 'data.json' };
 function loadCfg() {
   try { CFG = JSON.parse(localStorage.getItem(CFG_KEY)) || {}; }
   catch { CFG = {}; }

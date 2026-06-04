@@ -8,8 +8,8 @@ A GitHub Pages web app for a **2026 FIFA World Cup sweepstake** for Daniel and h
 friends (the **"Everything But"** group, ~12-13 people, called "the boys" in the UI).
 Scoring is **last team standing**: whoever owns the eventual champion wins the pot.
 
-- **Live URL:** https://danielf-neara.github.io/world-cup-sweep/
-- **Repo:** `danielf-neara/world-cup-sweep` (public, standalone)
+- **Live URL:** https://f1atty.github.io/world-cup-sweep/
+- **Repo:** `f1atty/world-cup-sweep` (public, standalone; transferred from danielf-neara, which remains a collaborator so this CLI can still push)
 - **Local clone:** `/Users/danielfainsinger/Documents/GitHub/world-cup-sweep/`
 - **Stack:** vanilla HTML/CSS/JS, no build step. Data in `data.json`, synced to GitHub.
 - **Aesthetic:** dark "stadium at night" — pitch-green/black, lime + magenta + cyan accents,
