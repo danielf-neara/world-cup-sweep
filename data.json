@@ -2,7 +2,7 @@
   "meta": {
     "title": "World Cup '26 Sweep",
     "subtitle": "Everything But · Last Team Standing",
-    "lastUpdated": "2026-06-04T08:07:31.394Z",
+    "lastUpdated": "2026-06-04T08:07:38.466Z",
     "lastResultSync": "2026-06-03T05:47:55.918919+00:00"
   },
   "teams": [
@@ -500,7 +500,8 @@
         "cur",
         "hai"
       ]
-    }
+    },
+    "locked": true
   },
   "champion": null,
   "schedule": [
