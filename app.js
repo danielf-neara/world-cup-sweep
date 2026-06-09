@@ -881,6 +881,23 @@ function mcSideHTML(m, s, align) {
     ? `<span class="mc-team">${name}</span>${tag}<span class="fl">${flag}</span>`
     : `<span class="fl">${flag}</span><span class="mc-team">${name}</span>${tag}`;
 }
+// One owner chip for the mobile owners row (mirrors the inline .otag used on desktop)
+function mcOwnerChip(teamId, side) {
+  const o = teamId ? ownerOf(teamId) : null;
+  return o
+    ? `<span class="mc-owner-chip mc-owner-${side}" style="--oc:${boyColor(o)}" title="${esc(o)}">${esc(o)}</span>`
+    : `<span class="mc-owner-chip mc-owner-${side} mc-owner-none">—</span>`;
+}
+// Owners footer: only meaningful once the draw has allocated teams to boys.
+// Hidden on desktop (owners show inline next to the team name); shown on a phone.
+function mcOwnersHTML(m) {
+  if (!ownerOf(m.t1) && !ownerOf(m.t2)) return '';
+  return `<div class="mc-owners">
+    ${mcOwnerChip(m.t1, 'home')}
+    <span class="mc-owner-sep">owners</span>
+    ${mcOwnerChip(m.t2, 'away')}
+  </div>`;
+}
 function mcRowHTML(m) {
   const live = isLive(m);
   const done = m.status === 'finished';
@@ -893,6 +910,7 @@ function mcRowHTML(m) {
     <span class="mc-side home">${mcSideHTML(m, '1', 'home')}</span>
     <span class="mc-score">${mid}</span>
     <span class="mc-side away">${mcSideHTML(m, '2', 'away')}</span>
+    ${mcOwnersHTML(m)}
   </div>`;
 }
 function renderMatchCentre() {

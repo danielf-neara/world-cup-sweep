@@ -461,6 +461,21 @@ label.fld { display:block; font-size:12px; font-weight:800; letter-spacing:0.1em
 .mc-score .mc-time { font-family: var(--body); font-size:14px; font-weight:800; color: var(--cyan); }
 .mc-score .mc-pen { display:block; font-family:var(--body); font-size:10px; font-weight:700; color: var(--muted); }
 .mc-row.live .mc-score { color: var(--magenta); }
+/* Owners footer — hidden on desktop (owners show inline as .otag); revealed on a phone */
+.mc-owners {
+  grid-column: 1 / -1; display:none;
+  grid-template-columns: 1fr auto 1fr; align-items:center; gap:8px;
+  margin-top:10px; padding-top:9px; border-top:1px dashed var(--line-soft);
+}
+.mc-owner-chip {
+  font-size:10px; font-weight:800; letter-spacing:0.03em; padding:2px 8px;
+  border-radius:100px; white-space:nowrap; color:#06120c; background: var(--oc, var(--lime));
+  max-width:100%; overflow:hidden; text-overflow:ellipsis;
+}
+.mc-owner-home { justify-self:end; }
+.mc-owner-away { justify-self:start; }
+.mc-owner-none { color: var(--muted); background:transparent; font-weight:700; }
+.mc-owner-sep { font-size:9px; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; color: var(--dim); }
 
 /* ---------- Two-step draw setup ---------- */
 .step-tag {
@@ -690,7 +705,8 @@ label.fld { display:block; font-size:12px; font-weight:800; letter-spacing:0.1em
   .boy-card .bc-name { font-size:21px; }
   /* match centre on a phone */
   .mc-row { grid-template-columns: 38px 1fr auto 1fr; gap:6px; padding:11px 10px; font-size:13px; }
-  .mc-row .otag { display:none; }
+  .mc-row .otag { display:none; }            /* inline owner tags don't fit; use the footer instead */
+  .mc-row .mc-owners { display:grid; }       /* show owners on their own row, in portrait */
   .mc-side .fl { font-size:19px; }
   .mc-score { font-size:18px; min-width:46px; }
   .mc-daylabel #mcLabel { font-size:21px; }
