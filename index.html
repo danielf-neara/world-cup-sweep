@@ -146,11 +146,19 @@
         </div>
         <button class="mc-arrow" id="mcNext" title="Next day">›</button>
       </div>
-      <div style="text-align:center; margin-bottom:14px;">
+      <div class="mc-controls">
         <button class="mc-today" id="mcToday">Jump to today</button>
+        <span class="mc-tzpick">
+          <label for="mcTz">🌐 Times in</label>
+          <select id="mcTz" class="mc-tz">
+            <option value="Australia/Sydney">Sydney</option>
+            <option value="Europe/London">UK · London</option>
+            <option value="America/New_York">US East · New York</option>
+          </select>
+        </span>
       </div>
       <div id="mcList"></div>
-      <p class="help" style="text-align:center; margin-top:14px;">All times in Sydney (AEST). Results auto-update during the tournament.</p>
+      <p class="help" style="text-align:center; margin-top:14px;"><span id="mcTzNote"></span> Results auto-update during the tournament.</p>
     </section>
 
     <!-- ============ GROUPS ============ -->
@@ -159,7 +167,7 @@
         <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px;">
           <div>
             <h2>Group Stage</h2>
-            <p class="hint" id="groupsHint" style="margin:0;">12 groups of four. Top two plus the eight best third-placed teams reach the Round of 32. Kick-off times shown in Sydney (AEST).</p>
+            <p class="hint" id="groupsHint" style="margin:0;">12 groups of four. Top two plus the eight best third-placed teams reach the Round of 32. Kick-off times follow the zone you pick in Match Centre.</p>
           </div>
           <span class="count-chip" id="groupsProgress"></span>
         </div>
@@ -173,7 +181,7 @@
         <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px;">
           <div>
             <h2>Knockout Bracket</h2>
-            <p class="hint" style="margin:0;">Round of 32 through to the Final. Teams fill in as the groups finish. Times in Sydney (AEST). Scroll across →</p>
+            <p class="hint" style="margin:0;">Round of 32 through to the Final. Teams fill in as the groups finish. Times follow the zone you pick in Match Centre. Scroll across →</p>
           </div>
           <span class="count-chip" id="knockoutProgress"></span>
         </div>

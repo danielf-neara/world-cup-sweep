@@ -7,6 +7,21 @@ const CFG_KEY = 'wcs_config';
 const HOUSE = '40th Trip';   // leftover teams (the pot) go here
 const DREGS = 'Dregs';       // optional unowned bucket (out of the sweep)
 
+// Kick-off times can be shown in one of these zones — picked once per viewer in
+// Match Centre and remembered in their browser. Drives every kick-off display
+// (Match Centre, Groups fixtures, Knockout) and the day grouping/boundaries.
+const TZ_KEY = 'wcs_tz';
+const TZS = [
+  { id: 'Australia/Sydney', label: 'Sydney' },
+  { id: 'Europe/London',    label: 'UK · London' },
+  { id: 'America/New_York', label: 'US East · New York' }
+];
+let tzId = 'Australia/Sydney';
+try { const s = localStorage.getItem(TZ_KEY); if (s && TZS.some(z => z.id === s)) tzId = s; } catch {}
+function displayZone()      { return tzId; }
+function displayZoneLabel() { return (TZS.find(z => z.id === tzId) || TZS[0]).label; }
+function setDisplayZone(id) { if (TZS.some(z => z.id === id)) { tzId = id; try { localStorage.setItem(TZ_KEY, id); } catch {} } }
+
 // Seeding order by FIFA Men's World Ranking. Reference data baked in here and
 // applied on every load, so it can never be lost by a data.json merge or an
 // auto-update commit. Index 0 = top seed.
@@ -669,13 +684,13 @@ function fmtDate(d) {
   const dt = new Date(d + 'T00:00:00');
   return isNaN(dt) ? '' : dt.toLocaleDateString('en-AU', { day: 'numeric', month: 'short' });
 }
-// kickoff rendered in Sydney time for every viewer, wherever they are
+// kickoff rendered in the viewer's chosen zone (Match Centre picker)
 function fmtKick(m, withTime) {
   const iso = m && m.kickoff;
   if (iso) {
     const dt = new Date(iso);
     if (!isNaN(dt)) {
-      const opts = { timeZone: 'Australia/Sydney', weekday: 'short', day: 'numeric', month: 'short' };
+      const opts = { timeZone: displayZone(), weekday: 'short', day: 'numeric', month: 'short' };
       if (withTime) Object.assign(opts, { hour: 'numeric', minute: '2-digit', hour12: true });
       return dt.toLocaleString('en-AU', opts).replace(/,/g, '');
     }
@@ -827,14 +842,13 @@ function koSideHTML(m, s, w, champ) {
 // ============================================================
 //  Match Centre (FotMob-style day-by-day)
 // ============================================================
-let mcDate = null;   // selected day key 'YYYY-MM-DD' (Sydney)
+let mcDate = null;   // selected day key 'YYYY-MM-DD' (in the viewer's chosen zone)
 
-const SYD = 'Australia/Sydney';
 function sydKey(iso) {
-  return new Intl.DateTimeFormat('en-CA', { timeZone: SYD, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(iso));
+  return new Intl.DateTimeFormat('en-CA', { timeZone: displayZone(), year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(iso));
 }
 function sydTime(iso) {
-  return new Date(iso).toLocaleString('en-AU', { timeZone: SYD, hour: 'numeric', minute: '2-digit', hour12: true });
+  return new Date(iso).toLocaleString('en-AU', { timeZone: displayZone(), hour: 'numeric', minute: '2-digit', hour12: true });
 }
 function todayKey() { return sydKey(new Date().toISOString()); }
 function addDays(key, n) {
@@ -916,6 +930,9 @@ function mcRowHTML(m) {
 function renderMatchCentre() {
   const wrap = $('#mcList'); if (!wrap) return;
   if (!mcDate) mcInit();
+  const tzSel = $('#mcTz'); if (tzSel) tzSel.value = tzId;
+  const tzNote = $('#mcTzNote');
+  if (tzNote) tzNote.textContent = `All times in ${displayZoneLabel()}.`;
   const keys = dayKeys();
   $('#mcLabel').textContent = dayLabel(mcDate);
   $('#mcDate').textContent = prettyDay(mcDate);
@@ -1162,6 +1179,12 @@ async function init() {
   $('#mcPrev').addEventListener('click', () => mcStep(-1));
   $('#mcNext').addEventListener('click', () => mcStep(1));
   $('#mcToday').addEventListener('click', () => { mcDate = todayKey(); renderMatchCentre(); });
+  const tzSel = $('#mcTz');
+  if (tzSel) tzSel.addEventListener('change', e => {
+    setDisplayZone(e.target.value);
+    mcDate = null; mcInit();   // day boundaries shift with the zone — re-pick the day
+    renderAll();               // also refreshes Groups/Knockout kick-off times
+  });
 
   // settings
   $('#cfgSave').addEventListener('click', () => { readCfgInputs(); saveCfg(); renderAll(); toast('Config saved'); $('#cfgStatus').textContent = 'Config saved to this browser.'; });
