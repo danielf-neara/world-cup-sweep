@@ -30,7 +30,7 @@ Scoring is **last team standing**: whoever owns the eventual champion wins the p
 ## The tabs
 
 1. **The Draw** — two-step draw (see below).
-2. **Match Centre** — FotMob-style day-by-day fixtures (Yesterday/Today/Tomorrow + arrows), Sydney times, FT/LIVE/kickoff, owner tags. Defaults to today or the next match day.
+2. **Match Centre** — FotMob-style day-by-day fixtures (Yesterday/Today/Tomorrow + arrows), per-viewer timezone (Sydney/London/New York), FT/LIVE/kickoff, owner tags. Defaults to today or the next match day.
 3. **Groups** — 12 live group tables (computed from results), top-2 highlighted, fixtures, owner tags.
 4. **Knockout** — full bracket R32 → Final (+ third place), tree-ordered, owner tags, fills in as groups finish.
 5. **Standings** — boys ranked by teams still alive; winner banner when champion is set.
@@ -99,15 +99,41 @@ python3 scripts/update_results.py --local FILE      # use a local openfootball j
 - `schedule[]`: 104 matches. `{num, stage, group, date, kickoff, t1, t2, ref1, ref2, s1, s2, p1, p2, status}`.
   - Match numbers: group 1-72, R32 73-88, R16 89-96, QF 97-100, SF 101-102, 3P 103, F 104.
   - Knockout `ref1/ref2` are slot labels ("2A", "3A/B/C/D/F", "W101") until resolved to `t1/t2`.
-  - `kickoff` is a **UTC ISO** instant; the frontend renders it in **Australia/Sydney** for all viewers.
+  - `kickoff` is a **UTC ISO** instant; the frontend renders it in the viewer's chosen zone (default **Australia/Sydney**).
 
 ## Key behaviours / conventions
 
-- **Times** are always shown in Sydney (AEST), DST-safe via `Intl` timeZone.
+- **Times** default to Sydney (AEST) but each viewer can switch the display zone — see the
+  Match Centre timezone picker under Recent additions. DST-safe via `Intl` timeZone.
 - **Active tab persists** across refresh (localStorage `wcs_view`); first-time default landing tab is **Match Centre**.
-- **Owner tags** appear on teams throughout (group tables, bracket, match centre — hidden on mobile in match centre).
+- **Owner tags** appear on teams throughout (group tables, bracket, match centre). On desktop
+  they show inline next to the team name; on a phone Match Centre shows them on a dedicated
+  owners row instead (see Recent additions).
 - **Mobile-first** is the priority (most viewing is on phones).
 - Australian English; no em dashes.
+
+## Recent additions
+
+These landed after the original handover was written and are not covered above:
+
+- **Match Centre timezone picker.** Each viewer can switch the display zone between
+  Sydney / London / New York; choice persists in `localStorage` (`TZ_KEY = 'wcs_tz'`).
+  Zones in `TZS`; helpers `displayZone()`, `displayZoneLabel()`, `setDisplayZone()`.
+  Defaults to `Australia/Sydney`. (Supersedes the old "always Sydney" behaviour — kickoffs
+  are still stored as UTC ISO and rendered in the chosen zone.)
+- **Match Centre owners on mobile.** Owners now render on a dedicated portrait row rather than
+  being hidden on phones: `mcOwnerChip(teamId, side)` builds one chip, `mcOwnersHTML(m)` the
+  footer row (hidden on desktop where owners show inline, shown on mobile).
+- **Match Centre row layout.** Score/time centred on the row (CSS).
+- **Trophy image in the header.** `trophy.png` shown via `.trophy-img`; the old inline SVG
+  trophy is kept as a hidden fallback.
+- **Hide-the-Settings-tab toggle.** Shared flag `DATA.meta.hideSettingsTab` hides the Settings
+  tab from the wider group. Logic: `settingsHidden()`, `settingsTabVisible()` (visible if not
+  hidden, or the viewer holds a token, or the URL hash opens it), `adminHashOpen()`, toggle
+  button `#toggleSettingsTab`, label/note synced by `updateSettingsTab()`. Re-open anytime via
+  `#settings` (or `#admin`) on the URL; stays visible on the admin's own browser.
+- **Groups card text contained.** CSS fixes so long team names and standings/fixtures text stay
+  inside the group card instead of overflowing.
 
 ## Team data accuracy
 
