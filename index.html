@@ -55,7 +55,7 @@
       <button data-view="knockout">Knockout</button>
       <button data-view="standings">Standings</button>
       <button data-view="teams">Teams</button>
-      <button data-view="settings">Settings</button>
+      <button data-view="settings" id="tabSettings">Settings</button>
     </nav>
 
     <!-- ============ DRAW ============ -->
@@ -239,6 +239,15 @@
           Token needs <b>Contents: Read &amp; write</b> on the repo (fine-grained PAT), or the classic <code>repo</code> scope.
           Without a token the app is read-only — anyone can view the draw and standings, only the admin can change them.
         </p>
+      </div>
+
+      <div class="panel admin-only">
+        <h2>Settings Tab Visibility</h2>
+        <p class="hint">Hide the Settings tab so the wider group doesn't see it. You can always get back in by adding <code>#settings</code> to the site URL, and it stays visible on your own (admin) browser.</p>
+        <div class="row-actions">
+          <button class="btn btn-ghost" id="toggleSettingsTab">Hide Settings tab</button>
+        </div>
+        <p class="help" id="settingsVisNote"></p>
       </div>
 
       <div class="panel admin-only">

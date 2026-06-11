@@ -35,7 +35,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 // ---- default seed (used if data.json can't be fetched) ----
 const SEED = {
-  meta: { title: "World Cup '26 Sweep", subtitle: "Last team standing takes the pot", lastUpdated: null },
+  meta: { title: "World Cup '26 Sweep", subtitle: "Last team standing takes the pot", hideSettingsTab: false, lastUpdated: null },
   teams: [],
   boys: [],
   draw: { completed: false, order: [], allocations: {} },
@@ -1053,6 +1053,23 @@ function renderAll() {
   renderStandings();
   renderTeamsAdmin();
   renderSyncStatus();
+  updateSettingsTab();
+}
+
+// The Settings tab can be hidden from the wider group (a shared flag in
+// data.json). It still shows for an admin (their browser holds a token) and can
+// be re-opened by anyone via the #settings URL — visibility is convenience, not
+// security; the token is the real gate.
+function settingsHidden()   { return !!(DATA && DATA.meta && DATA.meta.hideSettingsTab); }
+function adminHashOpen()    { return /(?:settings|admin)/i.test(location.hash || ''); }
+function settingsTabVisible(){ return !settingsHidden() || canEdit() || adminHashOpen(); }
+function updateSettingsTab() {
+  const b = $('#tabSettings'); if (b) b.style.display = settingsTabVisible() ? '' : 'none';
+  const btn = $('#toggleSettingsTab'); if (btn) btn.textContent = settingsHidden() ? 'Show Settings tab to everyone' : 'Hide Settings tab';
+  const note = $('#settingsVisNote');
+  if (note) note.innerHTML = settingsHidden()
+    ? 'Currently <b>hidden</b> from the group. Re-open it anytime via <code>#settings</code> in the URL.'
+    : 'Currently <b>visible</b> to everyone.';
 }
 function renderSyncStatus() {
   const dot = $('#syncDot'), label = $('#syncLabel');
@@ -1136,7 +1153,17 @@ async function init() {
   $$('nav.tabs button').forEach(b => b.addEventListener('click', () => switchView(b.dataset.view)));
   let saved = 'matches';
   try { saved = localStorage.getItem(VIEW_KEY) || 'matches'; } catch {}
+  if (saved === 'settings' && !settingsTabVisible()) saved = 'matches';
   if ($('#view-' + saved)) switchView(saved);
+  // #settings (or #admin) deep-link: reveal + open Settings, even when hidden
+  if (adminHashOpen()) switchView('settings');
+  window.addEventListener('hashchange', () => { updateSettingsTab(); if (adminHashOpen()) switchView('settings'); });
+  $('#toggleSettingsTab') && $('#toggleSettingsTab').addEventListener('click', async () => {
+    DATA.meta.hideSettingsTab = !settingsHidden();
+    renderAll();
+    const ok = await pushData(false);
+    toast(ok ? (settingsHidden() ? 'Settings tab hidden ✓' : 'Settings tab shown ✓') : 'Saved locally — add a token to share');
+  });
 
   // draw setup — two steps: draw the order, then draw the teams
   $('#addBoy').addEventListener('click', addBoy);
