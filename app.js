@@ -157,16 +157,27 @@ async function pollData() {
 // ============================================================
 //  Live results engine  (ported from scripts/update_results.py)
 //
-//  The browser fetches the public openfootball feed and derives the whole
-//  tournament state client-side: scores into the fixture schedule, knockout
-//  teams resolved, each team alive/out, and the champion. Nothing is written
-//  back anywhere — results are a live read of someone else's data, not a cache.
+//  The browser derives the whole tournament state client-side: fixture structure
+//  and knockout teams from openfootball, live scores overlaid from ESPN, then each
+//  team alive/out and the champion. Nothing is written back anywhere - results are
+//  a live read of someone else's data, not a cache.
 // ============================================================
 const OPENFOOTBALL_URL = 'https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json';
+// ESPN's public scoreboard: key-free, CORS-open (access-control-allow-origin: *),
+// and near-live (updates within a minute or so) where openfootball's community feed
+// can lag by hours or days. We take fixture STRUCTURE (knockout slot labels, bracket
+// wiring) from openfootball and overlay live SCORES from ESPN on top. limit=200 so the
+// whole tournament (104 matches) comes back in one request, not just the current day.
+const ESPN_URL = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=20260611-20260720&limit=200';
 const RESULTS_KEY = 'wcs_results';   // last-good cache (resilience only)
 
 // openfootball name -> our team name (only where they differ)
 const NAME_FIX = { 'Bosnia & Herzegovina': 'Bosnia and Herzegovina', 'USA': 'United States' };
+// ESPN displayName -> our team name (only where they differ)
+const ESPN_NAME_FIX = {
+  'Czechia': 'Czech Republic', 'Türkiye': 'Turkey', 'Congo DR': 'DR Congo',
+  'Bosnia-Herzegovina': 'Bosnia and Herzegovina', 'USA': 'United States',
+};
 // openfootball round label -> [our stage code, bracket numbering base]
 const STAGE = {
   'Round of 32': ['R32', 73], 'Round of 16': ['R16', 89], 'Quarter-final': ['QF', 97],
@@ -193,6 +204,52 @@ function ofScores(m) {
   if (!base) return [null, null, null, null];
   const pn = sc.p;
   return [base[0], base[1], pn ? pn[0] : null, pn ? pn[1] : null];
+}
+
+// Index ESPN's scoreboard by team-pair so we can overlay live scores onto our
+// schedule. Keyed by the sorted pair of OUR team ids; each value is a list (a pair
+// could in theory meet twice, and ESPN's date is a UTC instant that can land a day
+// off openfootball's venue-local date, so we disambiguate by nearest date later).
+function espnScoreIndex(espn) {
+  const nameToId = {}; DATA.teams.forEach(t => nameToId[t.name] = t.id);
+  const idOf = nm => nameToId[ESPN_NAME_FIX[nm] || nm] || null;
+  const idx = new Map();
+  (espn.events || []).forEach(e => {
+    const comp = (e.competitions || [])[0]; if (!comp) return;
+    const cs = comp.competitors || []; if (cs.length < 2) return;
+    const home = cs.find(c => c.homeAway === 'home') || cs[0];
+    const away = cs.find(c => c.homeAway === 'away') || cs[1];
+    const id1 = idOf(home.team && home.team.displayName);
+    const id2 = idOf(away.team && away.team.displayName);
+    if (!id1 || !id2) return;   // unresolved placeholder ("Group A Winner") -> skip
+    const st = (e.status && e.status.type) || {};
+    if (st.state !== 'in' && st.state !== 'post') return;   // not kicked off yet
+    const s1 = parseInt(home.score, 10), s2 = parseInt(away.score, 10);
+    if (!Number.isFinite(s1) || !Number.isFinite(s2)) return;
+    const p1 = home.shootoutScore != null ? +home.shootoutScore : null;
+    const p2 = away.shootoutScore != null ? +away.shootoutScore : null;
+    const rec = { id1, id2, s1, s2, p1, p2, finished: st.completed === true || st.state === 'post', date: (e.date || '').slice(0, 10) };
+    const key = [id1, id2].sort().join('|');
+    (idx.get(key) || idx.set(key, []).get(key)).push(rec);
+  });
+  return idx;
+}
+
+// Overlay ESPN scores onto the schedule built from openfootball. Only scores and the
+// finished flag are touched; team resolution and bracket wiring stay openfootball's job.
+function overlayEspnScores(idx) {
+  (DATA.schedule || []).forEach(m => {
+    if (!m.t1 || !m.t2) return;
+    const recs = idx.get([m.t1, m.t2].sort().join('|'));
+    if (!recs || !recs.length) return;
+    const md = m.date || '';
+    const e = recs.reduce((best, r) =>
+      Math.abs(Date.parse(r.date) - Date.parse(md)) < Math.abs(Date.parse(best.date) - Date.parse(md)) ? r : best);
+    // ESPN's home/away may be the reverse of our t1/t2 - align to our orientation.
+    if (e.id1 === m.t1) { m.s1 = e.s1; m.s2 = e.s2; m.p1 = e.p1; m.p2 = e.p2; }
+    else { m.s1 = e.s2; m.s2 = e.s1; m.p1 = e.p2; m.p2 = e.p1; }
+    if (e.finished) m.status = 'finished';
+  });
 }
 
 // Transform the openfootball feed into our schedule[] (same shape the Python emitted).
@@ -251,16 +308,26 @@ function resultsFingerprint() {
   });
 }
 
-// Fetch openfootball, rebuild schedule + statuses + champion. On failure, fall
-// back to the last-good cache. Returns true if the rendered state changed.
+// Rebuild schedule + statuses + champion: structure from openfootball, live scores
+// overlaid from ESPN. Either source alone is enough to refresh; if both are
+// unreachable, fall back to the last-good cache. Returns true if state changed.
 async function refreshResults() {
-  let ok = false;
+  let ofOk = false, espnOk = false;
+
+  // 1. Fixture structure (knockout slot labels, bracket wiring) from openfootball.
   try {
     const r = await fetch(OPENFOOTBALL_URL + '?t=' + Date.now(), { cache: 'no-store' });
-    if (r.ok) { DATA.schedule = buildSchedule(await r.json()); deriveStatus(); ok = true; }
+    if (r.ok) { DATA.schedule = buildSchedule(await r.json()); ofOk = true; }
   } catch (e) { console.warn('openfootball fetch failed', e); }
 
-  if (ok) {
+  // 2. Live scores from ESPN, overlaid onto whatever schedule we now have.
+  try {
+    const r = await fetch(ESPN_URL + '&_=' + Date.now(), { cache: 'no-store' });
+    if (r.ok) { overlayEspnScores(espnScoreIndex(await r.json())); espnOk = true; }
+  } catch (e) { console.warn('ESPN fetch failed', e); }
+
+  if (ofOk || espnOk) {
+    deriveStatus();
     const fp = resultsFingerprint();
     try {
       localStorage.setItem(RESULTS_KEY, JSON.stringify({
