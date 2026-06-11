@@ -11,7 +11,9 @@ Scoring is **last team standing**: whoever owns the eventual champion wins the p
 - **Live URL:** https://f1atty.github.io/world-cup-sweep/
 - **Repo:** `f1atty/world-cup-sweep` (public, standalone; transferred from danielf-neara, which remains a collaborator so this CLI can still push)
 - **Local clone:** `/Users/danielfainsinger/Documents/GitHub/world-cup-sweep/`
-- **Stack:** vanilla HTML/CSS/JS, no build step. Data in `data.json`, synced to GitHub.
+- **Stack:** vanilla HTML/CSS/JS, no build step. Static `data.json` holds the teams + the locked
+  draw; **match results are fetched live from openfootball in the browser** and derived
+  client-side (no GitHub Action, and no token needed now the draw is locked).
 - **Aesthetic:** dark "stadium at night" — pitch-green/black, lime + magenta + cyan accents,
   gold for trophy moments. Fonts: Anton (display) + Manrope (body).
 
@@ -21,10 +23,9 @@ Scoring is **last team standing**: whoever owns the eventual champion wins the p
 |------|--------------|
 | `index.html` | App shell + all views (tabs) |
 | `style.css` | All styling (stadium theme + mobile rules) |
-| `app.js` | Everything client-side: draw, scoring, groups, bracket, match centre, GitHub sync |
-| `data.json` | Single source of truth: teams, boys, draw, schedule (104 matches), results, champion |
-| `scripts/update_results.py` | Pulls results from openfootball, fills scores, derives alive/out + champion |
-| `.github/workflows/update-results.yml` | Runs the updater on a schedule + on demand |
+| `app.js` | Everything client-side: draw, scoring, groups, bracket, match centre, and the live-results engine (`refreshResults`/`buildSchedule`/`deriveStatus`) |
+| `data.json` | Static: teams, boys, the locked draw, fixture skeleton, champion seed. **No live scores** — fetched at runtime |
+| `scripts/update_results.py` | **No longer run** (Action removed). Kept as the reference the JS engine was ported from, and for local checks |
 | `README.md` | Public-facing readme |
 
 ## The tabs
@@ -34,7 +35,7 @@ Scoring is **last team standing**: whoever owns the eventual champion wins the p
 3. **Groups** — 12 live group tables (computed from results), top-2 highlighted, fixtures, owner tags.
 4. **Knockout** — full bracket R32 → Final (+ third place), tree-ordered, owner tags, fills in as groups finish.
 5. **Standings** — boys ranked by teams still alive; winner banner when champion is set.
-6. **Teams** — manual override tracker (admin marks teams out / crowns champion).
+6. **Teams** — manual override tracker. Now mostly vestigial: results are fetched live, so a refresh overwrites any manual edit.
 7. **Settings** — GitHub sync config, JSON export/import, reset/danger zone.
 
 ## How the draw works (two separate draws)
@@ -57,36 +58,33 @@ Scoring is **last team standing**: whoever owns the eventual champion wins the p
 
 ## Admin vs spectator
 
-- **Admin** = has a GitHub token saved in their browser (`canEdit()` true). Can draw + edit + push.
-- **Spectator** = no token. Read-only. `body.spectator` hides admin controls (`.admin-only`).
-  The Pages URL **is** the view-only link to send mates — nothing they click changes the sweep.
-- Repo config is pre-filled (`DEFAULT_REPO` in app.js), so the admin only pastes a token.
+- The **draw is locked** and baked into `data.json`, and results are now fetched live, so **no
+  GitHub token is needed** for normal running. Every visitor is effectively a spectator and the
+  Pages URL is the view-only link to send mates.
+- The token path still exists (`canEdit()`, `body.spectator`, `.admin-only`, `DEFAULT_REPO`): if
+  you ever re-draw, paste a fine-grained PAT (**Contents: Read & write**, scoped to
+  `world-cup-sweep`) on the Settings tab, unlock, redraw and re-lock — that commits the new draw
+  to `data.json`. After that the token is idle again. Stored only in that browser's localStorage
+  (`wcs_config`), never committed.
 
-### Token (admin setup)
+## Live results (fetched client-side)
 
-Fine-grained PAT, scoped to `world-cup-sweep`, **Contents: Read & write**. Create at
-https://github.com/settings/personal-access-tokens/new , then Settings tab → paste token →
-Save config. Stored only in that browser's localStorage (`wcs_config`), never committed.
-Pill shows "Admin · synced" when working. **Daniel has done this already.**
+- Source: **openfootball** (`raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json`) — public domain, no key, CORS-open.
+- **No GitHub Action and no results cache.** On load and every 90s the browser fetches the feed
+  and `refreshResults()` rebuilds the schedule with scores, resolves knockout teams, and derives
+  alive/out + champion — the logic `scripts/update_results.py` used to run, ported to JS. Results
+  are a live read, never written back, so there are no "Update sweep" commits.
+- Last-good results are cached in `localStorage` (`wcs_results`) so a transient openfootball
+  outage shows the last-known state rather than blank.
+- **Freshness** = openfootball's own lag (minutes to ~hour); there is no longer a 20-min cron.
+- Standings (last team standing) follow from `champion` + team alive/out, which the engine sets.
 
-## Auto-updating results
+### Run the reference updater locally (optional)
 
-- Source: **openfootball** (`raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json`) — public domain, no key.
-- A **GitHub Action** (`.github/workflows/update-results.yml`) runs `scripts/update_results.py`
-  every ~20 min during 11 Jun–19 Jul 2026 (cron) + manual `workflow_dispatch`.
-- The script fills scores, resolves knockout teams, recomputes standings, derives team
-  alive/out + champion, and commits `data.json` **only if results changed** (fingerprint
-  ignores the sync timestamp to avoid commit spam).
-- **Semi-live:** latency = openfootball update lag (minutes to ~hour) + the 20-min cron.
-- Manual fallback: the **Teams** tab. Auto-update is authoritative and reconciles on next run.
-- After the bot commits, `git pull` before editing locally.
-
-### Run the updater locally
+`scripts/update_results.py` is no longer wired into the app, but still works for a quick check:
 
 ```bash
-python3 scripts/update_results.py --dry-run        # preview, no write
-python3 scripts/update_results.py                  # fetch live + write data.json
-python3 scripts/update_results.py --local FILE      # use a local openfootball json
+python3 scripts/update_results.py --dry-run        # preview against live openfootball, no write
 ```
 
 ## Data model (`data.json`)
@@ -149,12 +147,12 @@ openfootball name diffs handled in the updater's `NAME_FIX`.
 
 ## Common next tasks (ideas, not committed)
 
-- Add a true live score source if openfootball lag is annoying (football-data.org via the Action — needs a free key as a repo secret).
+- Add a true live score source if openfootball lag is annoying (e.g. football-data.org) — its key can't be exposed client-side, so it would need a small backend/proxy.
 - Per-team goal totals / a "your live teams today" highlight for each boy.
 
 ## To resume
 
-1. `cd "/Users/danielfainsinger/Documents/GitHub/world-cup-sweep" && git pull`
+1. `cd "/Users/danielfainsinger/Documents/GitHub/world-cup-sweep" && git pull` (no auto-update bot now — pulls are only your own commits)
 2. Serve locally: `python3 -m http.server 8765` then open `http://localhost:8765`.
 3. This file + the auto-memory at
    `~/.claude/projects/-Users-danielfainsinger-Documents-GitHub-experiments/memory/world-cup-sweep.md`
