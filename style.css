@@ -356,9 +356,10 @@ label.fld { display:block; font-size:12px; font-weight:800; letter-spacing:0.1em
 }
 .standings-tbl td { text-align:center; padding:7px 3px; border-bottom:1px solid rgba(255,255,255,0.04); }
 .standings-tbl td.pos { color: var(--dim); font-family:var(--display); font-size:14px; width:18px; }
-.standings-tbl td.tm { text-align:left; white-space:nowrap; }
+.standings-tbl td.tm { text-align:left; }
 .standings-tbl td.tm .fl { font-size:18px; margin-right:7px; vertical-align:middle; }
-.standings-tbl td.tm .nm { vertical-align:middle; }
+.standings-tbl td.tm .nm { vertical-align:middle; overflow-wrap:anywhere; }
+.group-card { overflow:hidden; }
 .standings-tbl td.pts { font-weight:800; color: var(--text); }
 .standings-tbl tr.qual td.pos { color: var(--lime); }
 .standings-tbl tr.qual td:first-child { box-shadow: inset 3px 0 0 var(--lime); }
