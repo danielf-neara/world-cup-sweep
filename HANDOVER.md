@@ -12,7 +12,7 @@ Scoring is **last team standing**: whoever owns the eventual champion wins the p
 - **Repo:** `f1atty/world-cup-sweep` (public, standalone; transferred from danielf-neara, which remains a collaborator so this CLI can still push)
 - **Local clone:** `/Users/danielfainsinger/Documents/GitHub/world-cup-sweep/`
 - **Stack:** vanilla HTML/CSS/JS, no build step. Static `data.json` holds the teams + the locked
-  draw; **match scores are fetched live from ESPN in the browser** (fixture structure from openfootball) and derived
+  draw; **the entire live schedule (structure and scores) is fetched from ESPN in the browser** and derived
   client-side (no GitHub Action, and no token needed now the draw is locked).
 - **Aesthetic:** dark "stadium at night" — pitch-green/black, lime + magenta + cyan accents,
   gold for trophy moments. Fonts: Anton (display) + Manrope (body).
@@ -25,7 +25,7 @@ Scoring is **last team standing**: whoever owns the eventual champion wins the p
 | `style.css` | All styling (stadium theme + mobile rules) |
 | `app.js` | Everything client-side: draw, scoring, groups, bracket, match centre, and the live-results engine (`refreshResults`/`buildSchedule`/`deriveStatus`) |
 | `data.json` | Static: teams, boys, the locked draw, fixture skeleton, champion seed. **No live scores** — fetched at runtime |
-| `scripts/update_results.py` | **No longer run** (Action removed). Kept as the reference the JS engine was ported from, and for local checks |
+| `scripts/update_results.py` | **No longer run or used** (openfootball-based; Action removed). Kept only as the historical reference the JS engine was originally ported from |
 | `README.md` | Public-facing readme |
 
 ## The tabs
@@ -69,22 +69,17 @@ Scoring is **last team standing**: whoever owns the eventual champion wins the p
 
 ## Live results (fetched client-side)
 
-- **Two sources, split by job:**
-  - **Structure** from **openfootball** (`raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json`) — public domain, no key, CORS-open. Gives the fixture skeleton, knockout slot labels (`2A`, `W101`) and bracket wiring the app's tree relies on, and resolves knockout teams as the tournament progresses.
-  - **Live scores** from **ESPN's public scoreboard** (`site.api.espn.com/.../soccer/fifa.world/scoreboard?dates=20260611-20260720&limit=200`) — also key-free and CORS-open (`access-control-allow-origin: *`), and **near-live** (updates within ~a minute) where openfootball's community feed can lag hours or days. `limit=200` returns all 104 matches in one request.
-- **Why the split:** openfootball was the original single source but its scores lag badly (the opening Mexico–South Africa result was missing for over a day). ESPN is timely but uses different knockout placeholder labels (`Round of 32 1 Winner`) that don't fit the app's `W<num>` bracket scheme, so we keep openfootball for structure and **overlay** ESPN scores on top.
-- **How the overlay works** (`refreshResults`): fetch openfootball → `buildSchedule` (structure), then fetch ESPN → `espnScoreIndex` (keyed by sorted team-pair) → `overlayEspnScores` writes `s1/s2/p1/p2` and the finished flag onto matching schedule rows (orientation aligned to our `t1/t2`, nearest-date disambiguation). ESPN team-name diffs (Czechia, Türkiye, Congo DR, Bosnia-Herzegovina) are mapped in `ESPN_NAME_FIX`. Either source alone can refresh; if both fail, the `localStorage` (`wcs_results`) last-good cache is restored.
+- **Single source: ESPN.** Everything (fixture structure and live scores) comes from **ESPN's public scoreboard** (`site.api.espn.com/.../soccer/fifa.world/scoreboard?dates=20260611-20260720&limit=200`) in **one fetch** (key-free and CORS-open, `access-control-allow-origin: *`), and **near-live** (updates within ~a minute). `limit=200` returns all 104 matches in one request.
+- **How it builds the schedule** (`buildSchedule(espn)`): events are numbered 1..104 by ascending `event.id` (a self-consistent order); each match's stage comes from `season.slug`, the group letter from `data.json`, and the teams/score/status from the competitors. Knockout slot labels like `Round of 32 3 Winner` are converted into the existing `W<num>`/`L<num>` bracket refs. ESPN team-name diffs (Czechia, Türkiye, Congo DR, Bosnia-Herzegovina) are mapped in `ESPN_NAME_FIX`.
+- **openfootball was dropped (2026-06-28).** The app used to take fixture/bracket **structure** from openfootball (`raw.githubusercontent.com/openfootball/worldcup.json`) and overlay ESPN **scores** on top. That was removed because openfootball's knockout bracket wiring lagged the group results by hours: after the group stage it left Round-of-32 slots as placeholders like `1I` or `3A/B/C/D/F`, which made the qualification logic wrongly mark **qualified teams as OUT**. ESPN resolves the knockout teams immediately, so it is now the only source. Note: ESPN orders knockout matches differently from openfootball, so the bracket numbering is now **ESPN's own**, not openfootball's. (The old overlay helpers, `espnScoreIndex`/`overlayEspnScores`/`kickoffUtc`/`ofScores`, and the openfootball fetch were all removed.)
 - **No GitHub Action and no results commits.** On load and every 90s the browser refreshes; results are a live read, never written back.
-- **Freshness** ≈ ESPN's lag (about a minute) for scores; knockout team resolution still follows openfootball.
+- **Freshness** ≈ ESPN's lag (about a minute), for scores and knockout team resolution alike.
+- **Cache:** if the ESPN fetch fails, the `localStorage` (`wcs_results`) last-good cache is restored.
 - Standings (last team standing) follow from `champion` + team alive/out, which the engine sets.
 
-### Run the reference updater locally (optional)
+### scripts/update_results.py (historical reference only)
 
-`scripts/update_results.py` is no longer wired into the app, but still works for a quick check:
-
-```bash
-python3 scripts/update_results.py --dry-run        # preview against live openfootball, no write
-```
+`scripts/update_results.py` was openfootball-based and is **no longer run or used**. It is kept only as the historical reference the JS engine was originally ported from; it does not reflect the current ESPN-single-source model.
 
 ## Data model (`data.json`)
 
@@ -136,17 +131,17 @@ These landed after the original handover was written and are not covered above:
 
 The 48 teams + groups were cross-checked against two sources (Wikipedia 2026 draw + openfootball)
 and matched exactly. Any single team is editable directly in `data.json` (`name`/`group`/`flag`).
-openfootball name diffs handled in the updater's `NAME_FIX`.
+ESPN name diffs (Czechia, Türkiye, Congo DR, Bosnia-Herzegovina) are handled at runtime in `ESPN_NAME_FIX`.
 
 ## Known limitations / honest notes
 
-- **"LIVE" in Match Centre is still a time heuristic** (within ~2.5h of kickoff, not yet finished). ESPN actually exposes a true in-play state (`status.type.state === 'in'`) we could switch to, but the overlay currently only flips `status` to `finished` on completion and lets `isLive()` handle the in-play window. In-progress ESPN scores DO show during that window; they just don't count toward group tables until FT.
+- **"LIVE" in Match Centre is still a time heuristic** (within ~2.5h of kickoff, not yet finished). ESPN actually exposes a true in-play state (`status.type.state === 'in'`) we could switch to, but the engine currently only flips `status` to `finished` on completion and lets `isLive()` handle the in-play window. In-progress ESPN scores DO show during that window; they just don't count toward group tables until FT.
 - **No visual QA done in-browser** during the build (the Claude-in-Chrome extension wasn't connecting). All logic verified via Node VM harness; if something looks off on a phone, check the bracket/match-centre row widths first.
-- Group-stage elimination triggers only once all group matches are played and R32 teams are known (**relies on openfootball resolving the bracket** — its team resolution may lag too). If openfootball is slow to fill knockout teams once groups finish, the bracket won't progress even though ESPN has the scores. Hardening option: compute R32 teams app-side from the group tables instead of waiting on openfootball.
+- **Group-stage elimination now resolves promptly** because ESPN fills the Round-of-32 teams immediately once groups finish. (This was the reason openfootball was dropped on 2026-06-28: its bracket wiring lagged the group results by hours, leaving R32 slots as placeholders and wrongly marking qualified teams as OUT.) The bracket now progresses as soon as ESPN has the knockout matchups.
 
 ## Common next tasks (ideas, not committed)
 
-- ~~Add a true live score source~~ **Done** — ESPN's public scoreboard now supplies live scores (key-free, CORS-open, client-side). Next gap is the knockout-resolution dependency on openfootball noted above.
+- ~~Add a true live score source~~ **Done.** ESPN's public scoreboard now supplies the entire schedule (key-free, CORS-open, client-side, single fetch). ~~Next gap is the knockout-resolution dependency on openfootball~~ **Resolved:** openfootball was dropped on 2026-06-28 and ESPN now resolves the knockout teams immediately.
 - Per-team goal totals / a "your live teams today" highlight for each boy.
 
 ## To resume
