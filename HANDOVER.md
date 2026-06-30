@@ -1,153 +1,114 @@
-# Handover — World Cup '26 Sweep
+# World Cup '26 Sweep - Handover
 
-Everything needed to pick this project back up. Read this first if you're resuming.
+**Owner:** Daniel Fainsinger (Strategy & Ops)
+**Last updated:** 2026-06-30
+**Status:** Active
+**Repo:** `f1atty/world-cup-sweep` (public, standalone; transferred from danielf-neara, which remains a collaborator so this CLI can still push)
+
+<!--
+Living snapshot, not a changelog. Update the date whenever you touch it.
+-->
 
 ## What it is
 
-A GitHub Pages web app for a **2026 FIFA World Cup sweepstake** for Daniel and his
-friends (the **"Everything But"** group, ~12-13 people, called "the boys" in the UI).
-Scoring is **last team standing**: whoever owns the eventual champion wins the pot.
+A GitHub Pages web app for a **2026 FIFA World Cup sweepstake** for Daniel and his friends (the **"Everything But"** group, ~12-13 people, called "the boys" in the UI). Scoring is **last team standing**: whoever owns the eventual champion wins the pot. Vanilla HTML/CSS/JS, no build step; static `data.json` holds the teams + the locked draw, and the entire live schedule (structure and scores) is fetched from ESPN in the browser.
 
 - **Live URL:** https://f1atty.github.io/world-cup-sweep/
-- **Repo:** `f1atty/world-cup-sweep` (public, standalone; transferred from danielf-neara, which remains a collaborator so this CLI can still push)
 - **Local clone:** `/Users/danielfainsinger/Documents/GitHub/world-cup-sweep/`
-- **Stack:** vanilla HTML/CSS/JS, no build step. Static `data.json` holds the teams + the locked
-  draw; **the entire live schedule (structure and scores) is fetched from ESPN in the browser** and derived
-  client-side (no GitHub Action, and no token needed now the draw is locked).
-- **Aesthetic:** dark "stadium at night" — pitch-green/black, lime + magenta + cyan accents,
-  gold for trophy moments. Fonts: Anton (display) + Manrope (body).
+- **Aesthetic:** dark "stadium at night" - pitch-green/black, lime + magenta + cyan accents, gold for trophy moments. Fonts: Anton (display) + Manrope (body).
 
-## File map
+## Current status
 
-| File | What it does |
-|------|--------------|
+- **Draw is locked and baked into `data.json`** (`DATA.draw.locked`), survives reload. No GitHub token needed for normal running - every visitor is a spectator and the Pages URL is the view-only link.
+- **Live results work, single source = ESPN.** Whole schedule (structure + scores) fetched client-side from ESPN's public scoreboard in one key-free, CORS-open request; refreshes on load and every 90s. Near-live (~1 min lag).
+- **No GitHub Action and no results commits** - results are a live read, never written back.
+- **openfootball dropped (2026-06-28).** ESPN now resolves knockout teams immediately, so group-stage elimination resolves promptly (the old openfootball lag wrongly marked qualified teams as OUT).
+- **Most recent work (2026-06-29):** finished knockout ties now stay in their correct bracket slot in the Knockout tab.
+
+## How to run / access
+
+**To view (normal use):** open the live URL - no auth, no setup.
+
+**To resume / develop locally:**
+1. `cd "/Users/danielfainsinger/Documents/GitHub/world-cup-sweep" && git pull` (no auto-update bot - pulls are only your own commits).
+2. Serve locally: `python3 -m http.server 8765`, then open `http://localhost:8765`.
+
+**To re-draw (admin path, normally idle):** the token path still exists (`canEdit()`, `body.spectator`, `.admin-only`, `DEFAULT_REPO`). Paste a fine-grained PAT (**Contents: Read & write**, scoped to `world-cup-sweep`) on the Settings tab, unlock (two confirmations via `#unlockDraw`), redraw and re-lock - that commits the new draw to `data.json`. Token is stored only in that browser's localStorage (`wcs_config`), never committed.
+
+## How it works
+
+**Tabs (views in `index.html`, logic in `app.js`):**
+
+| Tab | What it does |
+|-----|--------------|
+| The Draw | Two-step draw (see Key decisions) |
+| Match Centre | FotMob-style day-by-day fixtures, per-viewer timezone, FT/LIVE/kickoff, owner tags. Default landing tab |
+| Groups | 12 live group tables computed from results, top-2 highlighted, fixtures, owner tags |
+| Knockout | Full bracket R32 → Final (+ third place), tree-ordered, owner tags, fills in as groups finish |
+| Standings | Boys ranked by teams still alive; winner banner when champion is set |
+| Teams | Manual override tracker. Mostly vestigial: results fetched live, so a refresh overwrites manual edits |
+| Settings | GitHub sync config, JSON export/import, reset/danger zone |
+
+**Live results engine:** ESPN scoreboard fetched once (`site.api.espn.com/.../soccer/fifa.world/scoreboard?dates=20260611-20260720&limit=200`). `buildSchedule(espn)` numbers events 1..104 by ascending `event.id`; stage from `season.slug`, group letter from `data.json`, teams/score/status from competitors. Knockout slot labels (e.g. `Round of 32 3 Winner`) convert to existing `W<num>`/`L<num>` bracket refs. Core functions: `refreshResults` / `buildSchedule` / `deriveStatus`. If the fetch fails, the `localStorage` (`wcs_results`) last-good cache is restored.
+
+## File / directory map
+
+| Path | What it is |
+|------|-----------|
 | `index.html` | App shell + all views (tabs) |
 | `style.css` | All styling (stadium theme + mobile rules) |
-| `app.js` | Everything client-side: draw, scoring, groups, bracket, match centre, and the live-results engine (`refreshResults`/`buildSchedule`/`deriveStatus`) |
-| `data.json` | Static: teams, boys, the locked draw, fixture skeleton, champion seed. **No live scores** — fetched at runtime |
-| `scripts/update_results.py` | **No longer run or used** (openfootball-based; Action removed). Kept only as the historical reference the JS engine was originally ported from |
+| `app.js` | Everything client-side: draw, scoring, groups, bracket, match centre, live-results engine |
+| `data.json` | Static: teams, boys, locked draw, fixture skeleton, champion seed. No live scores |
+| `trophy.png` | Header trophy image (`.trophy-img`); inline SVG kept as hidden fallback |
+| `scripts/update_results.py` | **No longer run or used** (openfootball-based; Action removed). Kept only as the historical reference the JS engine was ported from |
 | `README.md` | Public-facing readme |
 
-## The tabs
+## Key decisions & gotchas
 
-1. **The Draw** — two-step draw (see below).
-2. **Match Centre** — FotMob-style day-by-day fixtures (Yesterday/Today/Tomorrow + arrows), per-viewer timezone (Sydney/London/New York), FT/LIVE/kickoff, owner tags. Defaults to today or the next match day.
-3. **Groups** — 12 live group tables (computed from results), top-2 highlighted, fixtures, owner tags.
-4. **Knockout** — full bracket R32 → Final (+ third place), tree-ordered, owner tags, fills in as groups finish.
-5. **Standings** — boys ranked by teams still alive; winner banner when champion is set.
-6. **Teams** — manual override tracker. Now mostly vestigial: results are fetched live, so a refresh overwrites any manual edit.
-7. **Settings** — GitHub sync config, JSON export/import, reset/danger zone.
+**The draw (two separate draws):**
+- **Draw 1 - "Draw the order"** (`drawOrder()`): random animated shuffle of the boys, locks the running order, saves.
+- **Draw 2 - "Draw the teams"** (`drawTeams()`): pokie/slot-machine animation - boys down the left, a spinning vertical reel (`spinReel()`) on the right; each locked team pops into the on-the-clock boy's row. Deals in drawn order.
+- **Equal split + the pot:** every boy gets `floor(48 / N)` teams. Leftovers go to **"40th Trip"** (`HOUSE` constant), shown as its own gold card. 12 boys → 4 each, 40th Trip 0. 13 → 3 each, 40th Trip 9. 11 → 4 each, 40th Trip 4.
+- Re-running wipes allocations (confirm-guarded). Lock badge 🔒 shows when locked; Re-run hidden, Re-run/Reset/Wipe all blocked. Unlock takes two confirmations. UI driven by `updateLockUI()`.
+- **Draw style** (radio `input[name="drawMode"]`, default **pots**): `pots` (per-pot by ranking, top N revealed last, "Round X" banner via `showRoundBanner`), `potsplay` (40th Trip plays; `P=N+1`; dregs go to 40th Trip or a separate unowned **Dregs** bucket `DREGS='Dregs'`, excluded from `championOwner()`/standings), `seeds` (top-N seeds first then random), `random`. `#houseLowToggle` (seeds/random only when rem>0) sends rem lowest-ranked to 40th Trip.
+- **Seeds (1-48)** come from the official FIFA Men's World Ranking (inside.fifa.com API), baked into `SEED_ORDER` in `app.js` and applied on every load in `normalise()` - so a `data.json` merge or auto-update commit can't wipe them. To re-seed, edit `SEED_ORDER`. (Earlier bug: seeds lived only in `data.json` and got wiped by a merge, so "dregs" picked the last groups instead of the lowest-ranked - fixed by baking into app.js.)
 
-## How the draw works (two separate draws)
+**openfootball dropped (2026-06-28):** the app used to take fixture/bracket **structure** from openfootball and overlay ESPN **scores**. openfootball's knockout wiring lagged group results by hours, leaving R32 slots as placeholders (`1I`, `3A/B/C/D/F`) and wrongly marking qualified teams OUT. ESPN resolves knockout teams immediately, so it is now the only source. Bracket numbering is now ESPN's own. Old overlay helpers (`espnScoreIndex`/`overlayEspnScores`/`kickoffUtc`/`ofScores`) removed.
 
-- **Draw 1 — "Draw the order"** (`drawOrder()`): random shuffle of the boys, animated, locks the running order, saves.
-- **Draw 2 — "Draw the teams"** (`drawTeams()`): a **pokie/slot-machine** animation — boys listed down the left, a spinning vertical reel (`spinReel()`) on the right; each locked team pops into the on-the-clock boy's row so the board fills up live. Deals **in the drawn order**.
-- **Equal split + the pot:** every boy gets `floor(48 / N)` teams. Any leftovers go to
-  **"40th Trip"** (`HOUSE` constant) — the pot, shown as its own gold card.
-  - 12 boys → 4 each, 40th Trip 0. 13 → 3 each, 40th Trip 9. 11 → 4 each, 40th Trip 4.
-- Re-running wipes allocations (guarded by confirm). "Edit boys / redraw order" goes back to entry.
-- **Lock draw**: `DATA.draw.locked` (persisted, survives reload + auto-update bot). "Lock the draw" button on the results board; when locked, a 🔒 badge shows, Re-run is hidden, and Re-run/Reset/Wipe are all blocked. Unlocking takes **two confirmations** (`#unlockDraw`). UI driven by `updateLockUI()`.
-- **Draw style** (radio `input[name="drawMode"]`, default **pots**):
-  - **pots** — `per = floor(48/N)` pots of N by ranking; each boy gets one team per pot. Revealed **lowest pot first** so the **top N come out last**; a "Round X" banner (`showRoundBanner`, `#roundBanner`) sweeps between rounds. 40th Trip's rem lowest are **auto-allocated instantly (no slot animation)** before the rounds. One slot machine reused per round.
-  - **potsplay** ("Pots — 40th Trip plays") — 40th Trip is a full participant: `P = N+1` players, `perP = floor(48/P)` pots of P, everyone (incl 40th Trip, which spins like a player) draws one team per pot. The `remP` lowest leftovers go to 40th Trip OR a separate **Dregs** bucket (`#dregsBucketToggle`). `DREGS = 'Dregs'` is an **unowned** card: shown on the board, excluded from `championOwner()` and standings (`participants()` includes it for display only). Instant drop-in via `dropIn()`.
-  - **seeds** — each boy dealt one of the top-N seeds first, then random.
-  - **random** — fully random.
-  - `#houseLowToggle` (shown only for seeds/random when rem>0, via `updateDrawModeUI()`): 40th Trip takes the rem lowest-ranked teams; off = random leftovers. In pots mode the dregs always go to 40th Trip.
-  - Allocation lives in `drawTeams`; pots branch builds `pots[]` + `dregs` from `bySeed`.
-- Seeds (1-48) come from the **official FIFA Men's World Ranking** (inside.fifa.com API). The seed order is baked into `SEED_ORDER` in `app.js` and applied on every load in `normalise()`, so seeds are reference data that can't be lost by a `data.json` merge or auto-update commit. To re-seed (e.g. updated rankings), edit `SEED_ORDER`. (Earlier bug: seeds lived only in `data.json` and got wiped by a merge, so "dregs" picked the last groups instead of the lowest-ranked — fixed by baking them into app.js.)
+**Bracket ties (fixed 2026-06-29):** ESPN drops a slot's "winner of match N" ref once its feeder finishes. `bracketOrder()` keeps finished ties in their correct slot by matching each resolved team back to the prior-round match it won. Previously a tie vanished from its column the moment it was played.
 
-## Admin vs spectator
+**Other conventions / gotchas:**
+- **Times** default to Sydney (AEST); each viewer can switch zone (Sydney/London/New York) via the Match Centre picker. Persists in `localStorage` (`TZ_KEY='wcs_tz'`); zones in `TZS`; helpers `displayZone()`/`displayZoneLabel()`/`setDisplayZone()`. DST-safe via `Intl`. Kickoffs stored as UTC ISO, rendered in chosen zone.
+- **Match Centre owners on mobile** render on a dedicated portrait row (`mcOwnerChip`/`mcOwnersHTML`); inline on desktop.
+- **Active tab persists** across refresh (`localStorage wcs_view`); first-time default is Match Centre.
+- **Hide-the-Settings-tab toggle:** `DATA.meta.hideSettingsTab` (`settingsHidden()`, `settingsTabVisible()`, `adminHashOpen()`, `#toggleSettingsTab`, `updateSettingsTab()`). Re-open via `#settings` or `#admin` URL hash; stays visible on admin's own browser.
+- **"LIVE" in Match Centre is a time heuristic** (within ~2.5h of kickoff, not yet finished), not the true ESPN in-play state (`status.type.state === 'in'`) we could switch to. In-progress scores show during the window but don't count toward group tables until FT.
+- **No visual QA done in-browser** during the build (Claude-in-Chrome wasn't connecting). All logic verified via Node VM harness; if a phone view looks off, check bracket/match-centre row widths first.
+- **Mobile-first** is the priority. Australian English; no em dashes.
+- **Team data accuracy:** 48 teams + groups cross-checked against Wikipedia 2026 draw + openfootball, matched exactly. ESPN name diffs (Czechia, Türkiye, Congo DR, Bosnia-Herzegovina) handled at runtime in `ESPN_NAME_FIX`. Any team editable directly in `data.json` (`name`/`group`/`flag`).
 
-- The **draw is locked** and baked into `data.json`, and results are now fetched live, so **no
-  GitHub token is needed** for normal running. Every visitor is effectively a spectator and the
-  Pages URL is the view-only link to send mates.
-- The token path still exists (`canEdit()`, `body.spectator`, `.admin-only`, `DEFAULT_REPO`): if
-  you ever re-draw, paste a fine-grained PAT (**Contents: Read & write**, scoped to
-  `world-cup-sweep`) on the Settings tab, unlock, redraw and re-lock — that commits the new draw
-  to `data.json`. After that the token is idle again. Stored only in that browser's localStorage
-  (`wcs_config`), never committed.
+## Open tasks / next steps
 
-## Live results (fetched client-side)
+- [ ] Optional: switch "LIVE" from the time heuristic to ESPN's true in-play state (`status.type.state === 'in'`).
+- [ ] Idea (not committed): per-team goal totals / a "your live teams today" highlight for each boy.
 
-- **Single source: ESPN.** Everything (fixture structure and live scores) comes from **ESPN's public scoreboard** (`site.api.espn.com/.../soccer/fifa.world/scoreboard?dates=20260611-20260720&limit=200`) in **one fetch** (key-free and CORS-open, `access-control-allow-origin: *`), and **near-live** (updates within ~a minute). `limit=200` returns all 104 matches in one request.
-- **How it builds the schedule** (`buildSchedule(espn)`): events are numbered 1..104 by ascending `event.id` (a self-consistent order); each match's stage comes from `season.slug`, the group letter from `data.json`, and the teams/score/status from the competitors. Knockout slot labels like `Round of 32 3 Winner` are converted into the existing `W<num>`/`L<num>` bracket refs. ESPN team-name diffs (Czechia, Türkiye, Congo DR, Bosnia-Herzegovina) are mapped in `ESPN_NAME_FIX`. Bracket rendering (`bracketOrder()`): the Knockout tab stacks ties in true bracket order. ESPN drops a slot's "winner of match N" ref once its feeder finishes, so finished ties are kept in their correct slot by matching each resolved team back to the prior-round match it won (fixed 2026-06-29 — previously a tie vanished from its column the moment it was played).
-- **openfootball was dropped (2026-06-28).** The app used to take fixture/bracket **structure** from openfootball (`raw.githubusercontent.com/openfootball/worldcup.json`) and overlay ESPN **scores** on top. That was removed because openfootball's knockout bracket wiring lagged the group results by hours: after the group stage it left Round-of-32 slots as placeholders like `1I` or `3A/B/C/D/F`, which made the qualification logic wrongly mark **qualified teams as OUT**. ESPN resolves the knockout teams immediately, so it is now the only source. Note: ESPN orders knockout matches differently from openfootball, so the bracket numbering is now **ESPN's own**, not openfootball's. (The old overlay helpers, `espnScoreIndex`/`overlayEspnScores`/`kickoffUtc`/`ofScores`, and the openfootball fetch were all removed.)
-- **No GitHub Action and no results commits.** On load and every 90s the browser refreshes; results are a live read, never written back.
-- **Freshness** ≈ ESPN's lag (about a minute), for scores and knockout team resolution alike.
-- **Cache:** if the ESPN fetch fails, the `localStorage` (`wcs_results`) last-good cache is restored.
-- Standings (last team standing) follow from `champion` + team alive/out, which the engine sets.
+## Dependencies, integrations & contacts
 
-### scripts/update_results.py (historical reference only)
-
-`scripts/update_results.py` was openfootball-based and is **no longer run or used**. It is kept only as the historical reference the JS engine was originally ported from; it does not reflect the current ESPN-single-source model.
+- **ESPN public scoreboard** - `site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard` - single source for all fixtures and scores. Key-free, CORS-open. No account.
+- **GitHub Pages** - hosting at `f1atty.github.io/world-cup-sweep`. Repo `f1atty/world-cup-sweep` (Daniel's `danielf-neara` is a collaborator for CLI pushes).
+- **Fine-grained PAT** - only needed for the re-draw admin path; created ad hoc, scoped to this repo (Contents: Read & write), stored in browser localStorage only.
+- **FIFA Men's World Ranking** (inside.fifa.com API) - source of the seed order baked into `SEED_ORDER`. Reference only, not called at runtime.
+- **Auto-memory:** `~/.claude/projects/-Users-danielfainsinger-Documents-GitHub-experiments/memory/world-cup-sweep.md` carries additional context.
+- **Contact:** Daniel Fainsinger (owner / only maintainer).
 
 ## Data model (`data.json`)
 
-- `meta`: title, subtitle ("Everything But · Last Team Standing"), lastResultSync.
-- `teams[]`: `{id, name, group, flag, status}` — status `alive`|`out`. 48 teams.
+- `meta`: title, subtitle ("Everything But · Last Team Standing"), `lastResultSync`, `hideSettingsTab`.
+- `teams[]`: `{id, name, group, flag, status}` - status `alive`|`out`. 48 teams.
 - `boys[]`: participant names.
-- `draw`: `{completed, order[], allocations{}}`. `allocations` keyed by boy name (+ `"40th Trip"`).
+- `draw`: `{completed, order[], allocations{}, locked}`. `allocations` keyed by boy name (+ `"40th Trip"`).
 - `champion`: team id or null.
-- `schedule[]`: 104 matches. `{num, stage, group, date, kickoff, t1, t2, ref1, ref2, s1, s2, p1, p2, status}`.
+- `schedule[]`: 104 matches - `{num, stage, group, date, kickoff, t1, t2, ref1, ref2, s1, s2, p1, p2, status}`.
   - Match numbers: group 1-72, R32 73-88, R16 89-96, QF 97-100, SF 101-102, 3P 103, F 104.
   - Knockout `ref1/ref2` are slot labels ("2A", "3A/B/C/D/F", "W101") until resolved to `t1/t2`.
-  - `kickoff` is a **UTC ISO** instant; the frontend renders it in the viewer's chosen zone (default **Australia/Sydney**).
-
-## Key behaviours / conventions
-
-- **Times** default to Sydney (AEST) but each viewer can switch the display zone — see the
-  Match Centre timezone picker under Recent additions. DST-safe via `Intl` timeZone.
-- **Active tab persists** across refresh (localStorage `wcs_view`); first-time default landing tab is **Match Centre**.
-- **Owner tags** appear on teams throughout (group tables, bracket, match centre). On desktop
-  they show inline next to the team name; on a phone Match Centre shows them on a dedicated
-  owners row instead (see Recent additions).
-- **Mobile-first** is the priority (most viewing is on phones).
-- Australian English; no em dashes.
-
-## Recent additions
-
-These landed after the original handover was written and are not covered above:
-
-- **Match Centre timezone picker.** Each viewer can switch the display zone between
-  Sydney / London / New York; choice persists in `localStorage` (`TZ_KEY = 'wcs_tz'`).
-  Zones in `TZS`; helpers `displayZone()`, `displayZoneLabel()`, `setDisplayZone()`.
-  Defaults to `Australia/Sydney`. (Supersedes the old "always Sydney" behaviour — kickoffs
-  are still stored as UTC ISO and rendered in the chosen zone.)
-- **Match Centre owners on mobile.** Owners now render on a dedicated portrait row rather than
-  being hidden on phones: `mcOwnerChip(teamId, side)` builds one chip, `mcOwnersHTML(m)` the
-  footer row (hidden on desktop where owners show inline, shown on mobile).
-- **Match Centre row layout.** Score/time centred on the row (CSS).
-- **Trophy image in the header.** `trophy.png` shown via `.trophy-img`; the old inline SVG
-  trophy is kept as a hidden fallback.
-- **Hide-the-Settings-tab toggle.** Shared flag `DATA.meta.hideSettingsTab` hides the Settings
-  tab from the wider group. Logic: `settingsHidden()`, `settingsTabVisible()` (visible if not
-  hidden, or the viewer holds a token, or the URL hash opens it), `adminHashOpen()`, toggle
-  button `#toggleSettingsTab`, label/note synced by `updateSettingsTab()`. Re-open anytime via
-  `#settings` (or `#admin`) on the URL; stays visible on the admin's own browser.
-- **Groups card text contained.** CSS fixes so long team names and standings/fixtures text stay
-  inside the group card instead of overflowing.
-
-## Team data accuracy
-
-The 48 teams + groups were cross-checked against two sources (Wikipedia 2026 draw + openfootball)
-and matched exactly. Any single team is editable directly in `data.json` (`name`/`group`/`flag`).
-ESPN name diffs (Czechia, Türkiye, Congo DR, Bosnia-Herzegovina) are handled at runtime in `ESPN_NAME_FIX`.
-
-## Known limitations / honest notes
-
-- **"LIVE" in Match Centre is still a time heuristic** (within ~2.5h of kickoff, not yet finished). ESPN actually exposes a true in-play state (`status.type.state === 'in'`) we could switch to, but the engine currently only flips `status` to `finished` on completion and lets `isLive()` handle the in-play window. In-progress ESPN scores DO show during that window; they just don't count toward group tables until FT.
-- **No visual QA done in-browser** during the build (the Claude-in-Chrome extension wasn't connecting). All logic verified via Node VM harness; if something looks off on a phone, check the bracket/match-centre row widths first.
-- **Group-stage elimination now resolves promptly** because ESPN fills the Round-of-32 teams immediately once groups finish. (This was the reason openfootball was dropped on 2026-06-28: its bracket wiring lagged the group results by hours, leaving R32 slots as placeholders and wrongly marking qualified teams as OUT.) The bracket now progresses as soon as ESPN has the knockout matchups.
-
-## Common next tasks (ideas, not committed)
-
-- ~~Add a true live score source~~ **Done.** ESPN's public scoreboard now supplies the entire schedule (key-free, CORS-open, client-side, single fetch). ~~Next gap is the knockout-resolution dependency on openfootball~~ **Resolved:** openfootball was dropped on 2026-06-28 and ESPN now resolves the knockout teams immediately.
-- Per-team goal totals / a "your live teams today" highlight for each boy.
-
-## To resume
-
-1. `cd "/Users/danielfainsinger/Documents/GitHub/world-cup-sweep" && git pull` (no auto-update bot now — pulls are only your own commits)
-2. Serve locally: `python3 -m http.server 8765` then open `http://localhost:8765`.
-3. This file + the auto-memory at
-   `~/.claude/projects/-Users-danielfainsinger-Documents-GitHub-experiments/memory/world-cup-sweep.md`
-   carry the full context.
+  - `kickoff` is a UTC ISO instant; frontend renders it in the viewer's chosen zone (default Australia/Sydney).
